@@ -1,0 +1,6 @@
+{
+  "name": "Ashen Eclipse",
+  "description": "Dark fantasy ARPG with skill gems, linked support sockets, reservation auras, and procedural dungeon acts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Ashen Eclipse — ARPG (Milestone 2)</title>
+<style>
+:root{
+  --bg:#08070a;--panel:#131018;--edge:#524150;--gold:#e6bd78;--ivory:#efe4d6;
+  --muted:#a698a1;--hp:#b5232e;--es:#45b8e6;--mp:#295bc4;--xp:#d19e45;
+}
+*{box-sizing:border-box;user-select:none;-webkit-user-select:none}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--ivory);font:13px/1.4 system-ui,-apple-system,sans-serif}
+canvas#game{position:fixed;inset:0;display:block;cursor:crosshair}
+
+/* Top Bar */
+#topHud{position:fixed;left:12px;top:12px;z-index:20;display:flex;gap:7px;align-items:center;flex-wrap:wrap;
+  max-width:calc(100vw - 170px);padding:6px 10px;background:#120f17eb;border:1px solid var(--edge);border-radius:5px;box-shadow:0 6px 24px #000b}
+.pill{padding:3px 8px;border-radius:3px;background:#1e1924;border:1px solid #3c3040;font-weight:700;font-size:12px;font-variant-numeric:tabular-nums}
+.pill.gold{color:var(--gold)}
+#zoneLabel{font:700 13px Georgia,serif;color:var(--gold);letter-spacing:.03em}
+.hudBtn{padding:4px 9px;border:1px solid #755b48;border-radius:4px;background:linear-gradient(135deg,#33242b,#1e1722);
+  color:#f5dfc0;font-weight:700;font-size:12px;cursor:pointer;position:relative}
+.hudBtn:hover{border-color:var(--gold);filter:brightness(1.12)}
+.hudBtn .badge{position:absolute;top:-5px;right:-5px;background:#e6bd78;color:#120d14;font-size:10px;font-weight:800;
+  padding:0 5px;border-radius:10px;display:none}
+
+/* Objective Tracker */
+#objHud{position:fixed;right:12px;top:156px;z-index:20;width:190px;padding:8px 10px;background:#120f17e8;
+  border:1px solid #4c3d4d;border-left:3px solid var(--gold);border-radius:5px;box-shadow:0 6px 22px #000b;font-size:11px;pointer-events:none}
+#objHud b{display:block;font:700 13px Georgia,serif;color:var(--gold);margin-bottom:2px}
+#objHud span{color:#d8cad8;display:block}
+#objHud small{color:#8ce89a;display:block;margin-top:3px;font-weight:700}
+
+/* Minimap */
+#minimap{position:fixed;right:12px;top:12px;z-index:20;width:136px;height:136px;background:#0b090ee8;
+  border:1px solid #6b5665;border-radius:6px;box-shadow:0 8px 24px #000c;pointer-events:none}
+
+/* Boss Bar */
+#bossBar{position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:20;width:min(400px,54vw);
+  display:none;text-align:center;pointer-events:none;background:#141019e8;padding:7px 12px;
+  border:1px solid #75404b;border-radius:5px;box-shadow:0 8px 28px #000d}
+#bossBar .bname{font:700 15px Georgia,serif;color:#ffd0a6;letter-spacing:.04em}
+#bossBar .baffix{font-size:11px;color:#d09bb0;margin-bottom:4px}
+#bossBar .btrack{height:9px;background:#09070b;border:1px solid #592b35;border-radius:3px;overflow:hidden}
+#bossBar .bfill{height:100%;width:100%;background:linear-gradient(90deg,#8c1b2c,#df4e3e,#f59a56);transition:width .1s}
+
+/* Center Banner & Portal Prompt */
+#banner{position:fixed;left:50%;top:86px;transform:translateX(-50%);z-index:25;pointer-events:none;
+  font:700 19px Georgia,serif;color:#f5d59c;text-shadow:0 2px 12px #000,0 0 22px #a3522b;
+  letter-spacing:.08em;text-transform:uppercase;opacity:0;transition:opacity .35s;text-align:center}
+#portalPrompt{position:fixed;left:50%;bottom:135px;transform:translateX(-50%);z-index:26;display:none;
+  padding:7px 14px;background:#17121ef2;border:1px solid var(--gold);border-radius:5px;color:#ffe6ba;
+  font-weight:700;cursor:pointer;box-shadow:0 8px 24px #000d}
+#portalPrompt kbd{background:#2d2233;border:1px solid #7a6152;padding:1px 6px;border-radius:3px;margin-right:6px;color:var(--gold)}
+
+/* Bottom Action & Globe HUD */
+#hudBottom{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:20;
+  display:flex;align-items:flex-end;gap:12px;pointer-events:none}
+#hudBottom>*{pointer-events:auto}
+.globe{position:relative;width:88px;height:88px;border-radius:50%;border:3px solid #5a4854;
+  background:#0d090f;overflow:hidden;box-shadow:inset 0 0 18px #000,0 6px 20px #000d}
+.globe .fill{position:absolute;inset:0;transform:translateY(calc((1 - var(--pct,1)) * 100%));transition:transform .08s linear}
+#hpGlobe .fill{background:radial-gradient(circle at 35% 28%,#ff6d63,var(--hp) 58%,#450912)}
+#mpGlobe .fill{background:radial-gradient(circle at 35% 28%,#7bb4ff,var(--mp) 58%,#0d1d4d)}
+#mpReserve{position:absolute;left:0;right:0;top:0;height:0%;background:repeating-linear-gradient(45deg,#331e47cc,#331e47cc 4px,#1d1229cc 4px,#1d1229cc 8px);
+  border-bottom:2px solid #c78aff;pointer-events:none;transition:height .2s}
+.globe .esOverlay{position:absolute;inset:0;border-radius:50%;border:3px solid var(--es);
+  box-shadow:inset 0 0 14px #45b8e688;opacity:0;pointer-events:none;transition:opacity .15s}
+.globe::after{content:"";position:absolute;inset:7% 20% 58%;border-radius:50%;background:linear-gradient(#ffffff44,#ffffff00);pointer-events:none}
+.globe b{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;font-weight:700;
+  text-shadow:0 1px 4px #000;font-variant-numeric:tabular-nums;text-align:center;line-height:1.1;z-index:2}
+
+.centerRack{display:flex;flex-direction:column;align-items:center;gap:6px}
+#resourceBar{display:flex;align-items:center;gap:8px;padding:3px 10px;border-radius:4px;
+  background:#141019eb;border:1px solid #493b4d;font-size:11px;font-weight:700;color:#f0d29c}
+#resourceTrack{width:120px;height:6px;background:#09070b;border:1px solid #3c3040;border-radius:2px;overflow:hidden}
+#resourceFill{height:100%;width:0%;transition:width .08s}
+
+.dockRow{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#131018eb;
+  border:1px solid #594657;border-radius:7px;box-shadow:0 8px 26px #000c}
+.slot{position:relative;width:46px;height:46px;border:1px solid #6b5665;border-radius:6px;
+  background:linear-gradient(155deg,#2b2231,#141018);display:grid;place-items:center;
+  font-size:19px;cursor:pointer;overflow:hidden}
+.slot:hover{border-color:var(--gold)}
+.slot.activeAura{border-color:#d89cff;box-shadow:0 0 12px #b06bff88,inset 0 0 10px #b06bff44}
+.slot.emptySlot{opacity:.45}
+.slot kbd{position:absolute;left:3px;top:2px;font:700 8px system-ui;color:#f5d59c;background:#0c0910cc;
+  padding:1px 3px;border-radius:3px;border:1px solid #665143;z-index:2}
+.slot .cdMask{position:absolute;inset:0;background:#060508c8;transform-origin:bottom;transform:scaleY(var(--cd,0));pointer-events:none}
+.slot .supDots{position:absolute;bottom:2px;right:3px;display:flex;gap:2px;z-index:2}
+.slot .supDots i{width:6px;height:6px;border-radius:50%;display:block;border:1px solid #000}
+
+.divider{width:1px;height:38px;background:#493a48;margin:0 2px}
+
+.flask{position:relative;width:40px;height:46px;border:1px solid #63515f;border-radius:6px;
+  background:#110d14;display:grid;place-items:center;cursor:pointer;overflow:hidden}
+.flask .liquid{position:absolute;left:0;right:0;bottom:0;height:calc(var(--chg,1) * 100%);opacity:.45;transition:height .15s}
+.flask[data-kind="life"] .liquid{background:linear-gradient(#ff5c6c,#961724)}
+.flask[data-kind="mana"] .liquid{background:linear-gradient(#63a4ff,#1e449c)}
+.flask[data-kind="quick"] .liquid{background:linear-gradient(#9ef7c8,#29915d)}
+.flask kbd{position:absolute;left:3px;top:2px;font:700 9px system-ui;color:#f5d59c;background:#0c0910cc;padding:1px 3px;border-radius:2px;z-index:2}
+.flask .ico{font-size:17px;z-index:2}
+.flask .cnt{position:absolute;bottom:1px;right:3px;font:700 10px system-ui;color:#fff;z-index:2;text-shadow:0 1px 2px #000}
+.flask.empty{opacity:.45}
+
+#xpBar{position:fixed;left:0;right:0;bottom:0;height:4px;background:#0d0b10;z-index:25}
+#xpFill{height:100%;width:0%;background:linear-gradient(90deg,#9c6f2a,var(--gold));transition:width .2s}
+
+/* Overlays & Skill/Gem Panel */
+.overlay{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:18px;
+  background:radial-gradient(ellipse at center,#291e2ee8,#08070af5 72%)}
+.modalCard{width:min(880px,95vw);max-height:92vh;overflow:auto;padding:24px;background:linear-gradient(155deg,#1d1724,#100d14);
+  border:1px solid #8a6e59;border-radius:8px;box-shadow:0 20px 80px #000}
+.modalCard h1,.modalCard h2{margin:0 0 6px;font-family:Georgia,serif;color:var(--gold)}
+.modalCard h1{font-size:clamp(26px,4vw,38px);text-align:center}
+.modalCard .sub{text-align:center;color:var(--muted);margin:0 0 18px}
+.classGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.clsCard{display:flex;flex-direction:column;gap:8px;padding:15px;background:#17131d;border:1px solid #4e3f52;
+  border-radius:6px;text-align:left;color:var(--ivory);cursor:pointer;transition:border-color .15s,transform .12s}
+.clsCard:hover{border-color:var(--gold);transform:translateY(-2px)}
+.clsCard .head{display:flex;align-items:center;gap:10px}
+.clsCard .emoji{font-size:30px}
+.clsCard h2{font-size:19px}
+.clsCard .tag{font-size:11px;font-weight:700;color:#c79ef0;text-transform:uppercase;letter-spacing:.06em}
+.clsCard p{margin:0;font-size:12px;color:#cfc3d1;line-height:1.45}
+.clsCard ul{margin:4px 0 0;padding-left:16px;font-size:11px;color:#bfb2c2;line-height:1.5}
+.btnPrimary{margin-top:auto;padding:9px 14px;border:1px solid var(--gold);border-radius:4px;
+  background:linear-gradient(135deg,#8c593e,#4d2d45);color:#fff2dc;font-weight:700;cursor:pointer;text-align:center}
+.btnPrimary:hover{filter:brightness(1.15)}
+
+/* Gem Panel */
+#gemOverlay{display:none;z-index:90}
+.gemHeader{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #3d3142;padding-bottom:10px;margin-bottom:14px}
+.gemHeader h2{margin:0;font-size:22px}
+.gemLayout{display:grid;grid-template-columns:1.25fr 1fr;gap:16px}
+.gemSection h3{margin:0 0 8px;font:700 14px Georgia,serif;color:#e6bd78;text-transform:uppercase;letter-spacing:.05em}
+.linkRow{padding:10px;margin-bottom:10px;background:#15111b;border:1px solid #44364a;border-radius:6px}
+.linkTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px}
+.linkTop b{color:#f5d59c}
+.socketsBar{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.socketNode{flex:1;min-height:46px;padding:5px 7px;border:1px solid #665269;border-radius:5px;background:#0e0b12;
+  display:flex;align-items:center;gap:7px;cursor:pointer;text-align:left;color:var(--ivory);font-size:11px}
+.socketNode:hover{border-color:var(--gold)}
+.socketNode.selected{border-color:#ffd86b;box-shadow:0 0 12px #ffd86b55;background:#221a29}
+.socketNode.locked{opacity:.45;cursor:not-allowed;border-style:dashed}
+.linkChain{width:16px;height:4px;background:linear-gradient(90deg,#e6bd78,#9a69c7);border-radius:2px;flex-shrink:0}
+.linkStats{font-size:11px;color:#bfb2c4;line-height:1.35}
+.gemStash{display:grid;gap:6px;max-height:420px;overflow:auto;padding-right:4px}
+.gemItem{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid #4a3a4f;border-radius:5px;
+  background:#17131d;cursor:pointer;text-align:left;color:var(--ivory)}
+.gemItem:hover{border-color:var(--gold);background:#221b2b}
+.gemItem .gico{font-size:20px;width:28px;text-align:center}
+.gemItem b{display:block;font-size:12px}
+.gemItem small{display:block;font-size:11px;color:#b8aab8}
+.gemTag{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;text-transform:uppercase;margin-left:auto}
+.gemTag.active{background:#2d2138;color:#d6a8ff;border:1px solid #6d4b8c}
+.gemTag.support{background:#1b2c25;color:#82f5aa;border:1px solid #3c7557}
+
+#deathScreen{display:none}
+#deathScreen .modalCard{width:min(420px,92vw);text-align:center}
+#deathScreen h1{color:#e0515a}
+
+#controlsHint{position:fixed;left:12px;bottom:14px;z-index:18;padding:6px 10px;background:#120f17d8;
+  border:1px solid #3c3040;border-radius:5px;font-size:11px;color:#b8aab8;pointer-events:none}
+@media(max-width:780px){
+  .classGrid,.gemLayout{grid-template-columns:1fr}
+  .globe{width:62px;height:62px}
+  .slot{width:38px;height:38px;font-size:15px}
+  .flask{width:34px;height:40px}
+  #controlsHint,#objHud{display:none}
+  #minimap{width:92px;height:92px}
+}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="topHud">
+  <span id="zoneLabel">Act I · The Forsaken Moor</span>
+  <span class="pill" id="depthPill">Depth 1</span>
+  <span class="pill gold" id="levelPill">Lv 1</span>
+  <span class="pill" id="classPill">—</span>
+  <button class="hudBtn" id="gemsBtn">💎 Skill Gems (G)<span class="badge" id="gemBadge"></span></button>
+</div>
+
+<canvas id="minimap" width="136" height="136"></canvas>
+
+<aside id="objHud">
+  <b id="objTitle">Depth 1 Objective</b>
+  <span id="objDesc">Defeat Floor Wardens</span>
+  <small id="objState"></small>
+</aside>
+
+<div id="bossBar">
+  <div class="bname">Boss</div>
+  <div class="baffix"></div>
+  <div class="btrack"><div class="bfill" id="bossFill"></div></div>
+</div>
+
+<div id="banner"></div>
+<button id="portalPrompt"><kbd>E</kbd><span>Descend to Depth 2</span></button>
+
+<div id="controlsHint">
+  <b>WASD</b> Move · <b>LMB / RMB / Q / R</b> Skills · <b>Space</b> Evade · <b>1–3</b> Flasks · <b>G</b> Skill Gems · <b>E</b> Portal
+</div>
+
+<div id="hudBottom">
+  <div class="globe" id="hpGlobe">
+    <div class="fill"></div>
+    <div class="esOverlay" id="esOverlay"></div>
+    <b id="hpText">100</b>
+  </div>
+
+  <div class="centerRack">
+    <div id="resourceBar">
+      <span id="resourceLabel">Rage</span>
+      <div id="resourceTrack"><div id="resourceFill"></div></div>
+      <span id="resourceNum">0</span>
+    </div>
+    <div class="dockRow">
+      <div class="slot" id="slot0"><kbd>LMB</kbd><span>⚔️</span><div class="supDots"></div><div class="cdMask"></div></div>
+      <div class="slot" id="slot1"><kbd>RMB</kbd><span>💥</span><div class="supDots"></div><div class="cdMask"></div></div>
+      <div class="slot" id="slot2"><kbd>Q</kbd><span>⚡</span><div class="supDots"></div><div class="cdMask"></div></div>
+      <div class="slot" id="slot3"><kbd>R</kbd><span>🔥</span><div class="supDots"></div><div class="cdMask"></div></div>
+      <div class="slot" id="slotEvade" title="Space: Class Evade"><kbd>SPC</kbd><span>💨</span><div class="cdMask"></div></div>
+      <div class="divider"></div>
+      <div class="flask" data-kind="life" id="flask0" title="Key 1: Life Flask"><kbd>1</kbd><div class="liquid"></div><span class="ico">🧪</span><span class="cnt">3</span></div>
+      <div class="flask" data-kind="mana" id="flask1" title="Key 2: Mana Flask"><kbd>2</kbd><div class="liquid"></div><span class="ico">💧</span><span class="cnt">4</span></div>
+      <div class="flask" data-kind="quick" id="flask2" title="Key 3: Quicksilver Flask (+40% Speed)"><kbd>3</kbd><div class="liquid"></div><span class="ico">⚡</span><span class="cnt">2</span></div>
+    </div>
+  </div>
+
+  <div class="globe" id="mpGlobe">
+    <div class="fill"></div>
+    <div id="mpReserve"></div>
+    <b id="mpText">50</b>
+  </div>
+</div>
+
+<div id="xpBar"><div id="xpFill"></div></div>
+
+<!-- Class Selection Overlay -->
+<section class="overlay" id="classOverlay">
+  <div class="modalCard">
+    <h1>ASHEN ECLIPSE</h1>
+    <p class="sub">Milestone 2 · Skill Gems, Linked Support Sockets, Reservation Auras &amp; Act Pacing</p>
+    <div class="classGrid" id="classChoices"></div>
+  </div>
+</section>
+
+<!-- Skill & Support Gems Overlay -->
+<section class="overlay" id="gemOverlay">
+  <div class="modalCard" style="width:min(960px,96vw)">
+    <div class="gemHeader">
+      <div>
+        <h2>Skill &amp; Support Gems</h2>
+        <span style="color:#bfb2c2;font-size:12px">Click a socket on the left, then click a Gem on the right to socket/link it. Gems level up from kills!</span>
+      </div>
+      <button class="hudBtn" id="closeGemsBtn">Close (G)</button>
+    </div>
+    <div class="gemLayout">
+      <div class="gemSection">
+        <h3>Equipped Skill Links (Active + 2 Supports)</h3>
+        <div id="equippedLinks"></div>
+      </div>
+      <div class="gemSection">
+        <h3>Gem Stash (Drop from Wardens, Elites &amp; Bosses)</h3>
+        <div class="gemStash" id="gemStashList"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Death Overlay -->
+<section class="overlay" id="deathScreen">
+  <div class="modalCard">
+    <h1>YOU HAVE FALLEN</h1>
+    <p class="sub" id="deathInfo">Slain in the depths.</p>
+    <button class="btnPrimary" id="respawnBtn" style="width:100%">Rise at Depth Entrance</button>
+  </div>
+</section>
+
+<script>
+(() => {
+'use strict';
+
+// ============================================================================
+// MODULE 1: CONSTANTS & UTILITIES
+// ============================================================================
+const TILE = 44;
+const GRID = 54;
+const rand = (a, b) => a + Math.random() * (b - a);
+const randInt = (a, b) => Math.floor(rand(a, b + 1));
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const angleDiff = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
+const xpNeeded = lv => Math.floor(65 * Math.pow(lv, 1.48));
+
+function getActInfo(depth) {
+  if (depth <= 5)  return { act: 1, name: 'Act I · The Forsaken Moor',    boss: 'Vaelkor, the Ash-Bound',     tint: '#241d26', bossDepth: 5 };
+  if (depth <= 10) return { act: 2, name: 'Act II · The Iron Bastion',    boss: 'Malakor, Forge Tyrant',      tint: '#26201d', bossDepth: 10 };
+  if (depth <= 16) return { act: 3, name: 'Act III · Sunken Cathedral',   boss: 'Seraphina, the Pale Choir',  tint: '#1a2429', bossDepth: 16 };
+  return                  { act: 4, name: 'Act IV · The Fractured Spire', boss: 'Aurelion, Herald of Eclipse',tint: '#231b2b', bossDepth: 22 };
+}
+
+// ============================================================================
+// MODULE 2: PROCEDURAL WEBAUDIO ENGINE
+// ============================================================================
+const AudioSys = (() => {
+  let ctx = null, master = null;
+  const last = {};
+  const init = () => {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+      master = ctx.createGain();
+      master.gain.value = 0.24;
+      master.connect(ctx.destination);
+    }
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    return ctx;
+  };
+  const tone = (freq, dur, type = 'triangle', vol = 0.24, slide = 0, tag = '') => {
+    const c = init();
+    if (!c) return;
+    const now = performance.now();
+    if (tag && last[tag] && now - last[tag] < 45) return;
+    if (tag) last[tag] = now;
+    const t = c.currentTime;
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(25, freq + slide), t + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(g).connect(master);
+    osc.start(t);
+    osc.stop(t + dur);
+  };
+  return {
+    swing: () => tone(165, 0.09, 'sawtooth', 0.18, -85, 'sw'),
+    slam: () => { tone(88, 0.24, 'sawtooth', 0.34, -55, 'sl'); tone(140, 0.16, 'triangle', 0.2, -70); },
+    bolt: () => tone(420, 0.11, 'triangle', 0.16, -180, 'bo'),
+    nova: () => { tone(520, 0.22, 'sine', 0.24, -300, 'nv'); tone(260, 0.26, 'triangle', 0.18, 180); },
+    bow: () => tone(340, 0.08, 'triangle', 0.16, 160, 'bw'),
+    trap: () => tone(240, 0.12, 'square', 0.14, -90, 'tr'),
+    lightning: () => tone(620, 0.14, 'sawtooth', 0.16, -340, 'lt'),
+    aura: () => tone(392, 0.22, 'sine', 0.22, 196),
+    hit: () => tone(135, 0.07, 'square', 0.14, -55, 'ht'),
+    crit: () => { tone(290, 0.11, 'sawtooth', 0.22, 140, 'cr'); tone(580, 0.09, 'triangle', 0.16, 120); },
+    hurt: () => tone(105, 0.12, 'sawtooth', 0.26, -45, 'hu'),
+    dash: () => tone(460, 0.11, 'sine', 0.15, -240, 'da'),
+    flask: () => { tone(540, 0.09, 'sine', 0.19, 220); setTimeout(() => tone(780, 0.14, 'sine', 0.17, 180), 55); },
+    gemDrop: () => { tone(660, 0.12, 'triangle', 0.2, 220); setTimeout(() => tone(990, 0.22, 'sine', 0.22, 180), 90); },
+    level: () => { tone(440, 0.16, 'triangle', 0.24, 0); setTimeout(() => tone(554, 0.18, 'triangle', 0.24, 0), 90); setTimeout(() => tone(659, 0.32, 'triangle', 0.26, 0), 180); },
+    boss: () => tone(72, 0.65, 'sawtooth', 0.32, -25)
+  };
+})();
+
+// ============================================================================
+// MODULE 3: CLASSES, ACTIVE SKILL GEMS & SUPPORT GEMS
+// ============================================================================
+const CLASSES = {
+  dreadnought: {
+    id: 'dreadnought', name: 'Dreadnought', emoji: '🔨', tag: 'STR · Heavy Melee & Rage',
+    color: '#a84032', accent: '#ff9642',
+    desc: 'Armored juggernaut wielding colossal steel. Strikes generate Rage to fuel devastating slams & fire waves.',
+    perks: ['Starts with: Sunder Cleave + Earthshatter', 'Builds Rage on hit (50+ Rage emits Fire Waves)', 'High Health & Armor'],
+    baseHp: 145, baseMp: 50, speed: 185, armor: 18, evasion: 5,
+    resName: 'Rage', resMax: 100, resColor: 'linear-gradient(90deg,#b32b24,#ff8f36)',
+    evadeIcon: '🛡️', starterActives: ['sunder_cleave', 'earthshatter'], starterSupport: 'sup_aoe'
+  },
+  harbinger: {
+    id: 'harbinger', name: 'Harbinger', emoji: '🔮', tag: 'INT · Chaos, Frost & Energy Shield',
+    color: '#4e3578', accent: '#5ad1ff',
+    desc: 'Arcane occultist protected by regenerating Energy Shield. Commands chaos bolts, frost novas and chain lightning.',
+    perks: ['Starts with: Blight Bolt + Frost Pulse', 'Passive Energy Shield (45% of Max HP)', 'Excels with Chain & Multiprojectile links'],
+    baseHp: 95, baseMp: 95, speed: 195, armor: 6, evasion: 8, esPct: 0.45,
+    resName: 'Energy Shield', resMax: 100, resColor: 'linear-gradient(90deg,#2d6db8,#66e0ff)',
+    evadeIcon: '✨', starterActives: ['blight_bolt', 'frost_pulse'], starterSupport: 'sup_proj'
+  },
+  strider: {
+    id: 'strider', name: 'Strider', emoji: '🏹', tag: 'DEX · Bow, Traps & Frenzy Charges',
+    color: '#2e6149', accent: '#82f5aa',
+    desc: 'Agile marksman and trapper. Dodges strikes with Evasion and stacks Frenzy Charges for blistering speed.',
+    perks: ['Starts with: Split Arrow + Snare Trap', 'High Evasion + Frenzy Charges (+10% Speed/Atk)', 'Excels with Chain, Barrage & Fire links'],
+    baseHp: 110, baseMp: 68, speed: 215, armor: 8, evasion: 22,
+    resName: 'Frenzy Charges', resMax: 3, resColor: 'linear-gradient(90deg,#2fa363,#94ffc0)',
+    evadeIcon: '🍃', starterActives: ['split_arrow', 'snare_trap'], starterSupport: 'sup_chain'
+  }
+};
+
+const ACTIVE_GEM_DEFS = {
+  sunder_cleave: { id: 'sunder_cleave', name: 'Sunder Cleave', icon: '🪓', tag: 'Melee · AoE', mp: 0, cd: 0.36, baseDmg: 20, radius: 96, desc: 'Wide melee cleave. Builds +8 Rage per hit; at 50+ Rage launches a fiery wave.' },
+  earthshatter:  { id: 'earthshatter',  name: 'Earthshatter',  icon: '💢', tag: 'Slam · AoE', mp: 15, cd: 3.2, baseDmg: 36, radius: 145, desc: 'Slam the ground, consuming up to 30 Rage for +60% damage & 1.1s Stun.' },
+  ancestral_leap:{ id: 'ancestral_leap',name: 'Ancestral Leap',icon: '🦅', tag: 'Movement · AoE', mp: 14, cd: 4.0, baseDmg: 28, radius: 115, desc: 'Leap to cursor, crashing down for AoE damage and +18 Rage.' },
+  herald_ash:    { id: 'herald_ash',    name: 'Herald of Ash', icon: '🔥', tag: 'Aura · 25% Mana', mp: 0, cd: 0.6, aura: true, reserve: 0.25, desc: 'Aura: Enemies you slay erupt in fire, burning nearby foes for 65% of their Max HP.' },
+
+  blight_bolt:   { id: 'blight_bolt',   name: 'Blight Bolt',   icon: '🟣', tag: 'Projectile · Chaos', mp: 0, cd: 0.34, baseDmg: 17, radius: 42, proj: 1, desc: 'Fires a Chaos orb that explodes on impact and applies 3s Chaos Burn.' },
+  frost_pulse:   { id: 'frost_pulse',   name: 'Frost Pulse',   icon: '❄️', tag: 'Nova · Cold', mp: 18, cd: 3.5, baseDmg: 32, radius: 155, desc: 'Freezing ring that Chills foes (+40% damage if already Chilled).' },
+  void_conduit:  { id: 'void_conduit',  name: 'Void Conduit',  icon: '⚡', tag: 'Chain · Lightning', mp: 16, cd: 2.8, baseDmg: 25, radius: 240, chains: 3, desc: 'Arcs across up to 4 targets, applying Shocked (+20% damage taken for 4s).' },
+  purity_frost:  { id: 'purity_frost',  name: 'Purity of Frost',icon: '💠', tag: 'Aura · 25% Mana', mp: 0, cd: 0.6, aura: true, reserve: 0.25, desc: 'Aura: +25% Max Energy Shield, +15 Armor & automatically Chills nearby foes.' },
+
+  split_arrow:   { id: 'split_arrow',   name: 'Split Arrow',   icon: '🏹', tag: 'Projectile · Bow', mp: 0, cd: 0.28, baseDmg: 11.5, proj: 3, desc: 'Fires a fan of arrows. Hits build Frenzy Charges (+10% Attack/Move Speed).' },
+  snare_trap:    { id: 'snare_trap',    name: 'Snare Trap',    icon: '⚙️', tag: 'Trap · AoE', mp: 15, cd: 2.9, baseDmg: 36, radius: 98, desc: 'Tosses a trap that detonates for heavy damage (+12% per Frenzy Charge) and Chills.' },
+  rain_thorns:   { id: 'rain_thorns',   name: 'Rain of Thorns',icon: '🌧️', tag: 'Barrage · AoE', mp: 20, cd: 4.2, baseDmg: 24, radius: 118, desc: 'Calls down 3 rapid waves of arrows at cursor, applying Bleed.' },
+  grace_wind:    { id: 'grace_wind',    name: 'Grace of Wind', icon: '🌪️', tag: 'Aura · 25% Mana', mp: 0, cd: 0.6, aura: true, reserve: 0.25, desc: 'Aura: +22% Evasion Chance, +15% Move Speed & +15% Attack Speed.' }
+};
+
+const SUPPORT_GEM_DEFS = {
+  sup_proj:  { id: 'sup_proj',  name: 'Multiple Projectiles', icon: '🟢', color: '#62ed88', desc: '+2 Extra Projectiles (or +2 Chain targets), -15% Hit Damage, 115% Mana Cost', extraProj: 2, dmgMult: 0.85, mpMult: 1.15 },
+  sup_chain: { id: 'sup_chain', name: 'Chain Support',        icon: '🔵', color: '#65bdff', desc: 'Projectiles & Arcs chain to +2 additional nearby enemies, 115% Mana Cost', chains: 2, dmgMult: 0.95, mpMult: 1.15 },
+  sup_conc:  { id: 'sup_conc',  name: 'Concentrated Area',    icon: '🔴', color: '#ff6868', desc: '+38% AoE & Hit Damage, -25% AoE Radius (Boss Killer)', dmgMult: 1.38, aoeMult: 0.75, mpMult: 1.2 },
+  sup_aoe:   { id: 'sup_aoe',   name: 'Increased Area',       icon: '🔵', color: '#65bdff', desc: '+36% AoE Radius, +10% Skill Damage', dmgMult: 1.10, aoeMult: 1.36, mpMult: 1.1 },
+  sup_fast:  { id: 'sup_fast',  name: 'Faster Attacks/Cast',  icon: '🟢', color: '#62ed88', desc: '+25% Attack/Cast Speed & -18% Cooldown', cdMult: 0.82, mpMult: 1.1 },
+  sup_fire:  { id: 'sup_fire',  name: 'Added Fire Damage',    icon: '🔴', color: '#ff6868', desc: 'Adds +32% Fire Damage & Ignites enemies for 3s', dmgMult: 1.32, ignite: true, mpMult: 1.15 },
+  sup_leech: { id: 'sup_leech', name: 'Life Leech Support',   icon: '🔴', color: '#ff6868', desc: '4% of damage dealt by the linked skill restores Health', leech: 0.04, mpMult: 1.15 }
+};
+
+function makeGemInstance(defId, kind) {
+  return { uid: Math.random().toString(36).slice(2, 9), defId, kind, lv: 1, xp: 0 };
+}
+
+const gemXpNeed = lv => 80 * lv;
+
+// ============================================================================
+// MODULE 4: PROCEDURAL DUNGEON GENERATOR
+// ============================================================================
+const Dungeon = (() => {
+  const mkRng = seed => () => {
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+
+  function generate(depth) {
+    const rng = mkRng(depth * 9173 + 101);
+    const tiles = new Uint8Array(GRID * GRID);
+    const seen = new Uint8Array(GRID * GRID);
+    const rooms = [];
+    const torches = [];
+    const targetRooms = clamp(7 + Math.floor(depth * 0.5), 7, 13);
+
+    for (let i = 0; i < 140 && rooms.length < targetRooms; i++) {
+      const w = 6 + Math.floor(rng() * 5);
+      const h = 6 + Math.floor(rng() * 5);
+      const x = 3 + Math.floor(rng() * (GRID - w - 6));
+      const y = 3 + Math.floor(rng() * (GRID - h - 6));
+      if (rooms.some(r => x < r.x + r.w + 2 && x + w + 2 > r.x && y < r.y + r.h + 2 && y + h + 2 > r.y)) continue;
+      rooms.push({ x, y, w, h, cx: x + (w >> 1), cy: y + (h >> 1) });
+    }
+
+    for (const r of rooms) {
+      for (let yy = r.y; yy < r.y + r.h; yy++) {
+        for (let xx = r.x; xx < r.x + r.w; xx++) tiles[yy * GRID + xx] = 1;
+      }
+      torches.push({ x: (r.x + 1.2) * TILE, y: (r.cy + 0.5) * TILE });
+      torches.push({ x: (r.x + r.w - 1.2) * TILE, y: (r.cy + 0.5) * TILE });
+    }
+
+    const connected = [rooms[0]];
+    const remaining = rooms.slice(1);
+    while (remaining.length) {
+      let bestPair = null, bestD = Infinity;
+      for (const a of connected) {
+        for (const b of remaining) {
+          const d = Math.abs(a.cx - b.cx) + Math.abs(a.cy - b.cy);
+          if (d < bestD) { bestD = d; bestPair = [a, b]; }
+        }
+      }
+      const [a, b] = bestPair;
+      let cx = a.cx, cy = a.cy;
+      while (cx !== b.cx) { tiles[cy * GRID + cx] = tiles[(cy + 1) * GRID + cx] = 1; cx += cx < b.cx ? 1 : -1; }
+      while (cy !== b.cy) { tiles[cy * GRID + cx] = tiles[cy * GRID + cx + 1] = 1; cy += cy < b.cy ? 1 : -1; }
+      connected.push(b);
+      remaining.splice(remaining.indexOf(b), 1);
+    }
+
+    const start = { x: (rooms[0].cx + 0.5) * TILE, y: (rooms[0].cy + 0.5) * TILE };
+    const last = rooms[rooms.length - 1];
+    const portal = { x: (last.cx + 0.5) * TILE, y: (last.cy + 0.5) * TILE };
+    const bossFloor = depth % 5 === 0;
+    return { tiles, seen, rooms, torches, start, portal, bossFloor };
+  }
+  return { generate };
+})();
+
+// ============================================================================
+// MODULE 5: GAME STATE, GEM LINK CALCULATOR & ENTITIES
+// ============================================================================
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const mmCanvas = document.getElementById('minimap');
+const mmCtx = mmCanvas.getContext('2d');
+
+let W = innerWidth, H = innerHeight;
+const resize = () => { W = canvas.width = innerWidth; H = canvas.height = innerHeight; };
+addEventListener('resize', resize);
+resize();
+
+const ENEMY_TYPES = {
+  thrall:  { name: 'Risen Thrall',   hp: 40,  dmg: 9,  spd: 94,  r: 12, xp: 18, col: '#c7b8a1', range: 0 },
+  hulker:  { name: 'Ash Hulker',     hp: 125, dmg: 18, spd: 55,  r: 18, xp: 38, col: '#786259', range: 0, brute: true },
+  acolyte: { name: 'Blight Acolyte', hp: 46,  dmg: 12, spd: 68,  r: 12, xp: 26, col: '#9e6ed4', range: 265 },
+  boss:    { name: 'Act Boss',       hp: 860, dmg: 26, spd: 88,  r: 30, xp: 340, col: '#b83232', range: 0, boss: true }
+};
+
+const ELITE_AFFIXES = [
+  { id: 'molten', name: 'Molten', col: '#ff7a33', desc: 'Drops an explosive lava core on death' },
+  { id: 'arcane', name: 'Arcane', col: '#c87aff', desc: 'Summons rotating arcane beams' },
+  { id: 'hasted', name: 'Hasted', col: '#5ce6ff', desc: 'High movement and attack speed' }
+];
+
+const State = {
+  started: false,
+  gemMenuOpen: false,
+  selectedSocket: null, // { slotIdx, type: 'active'|'sup', supIdx }
+  depth: 1,
+  time: 0,
+  hitstop: 0,
+  shake: 0,
+  map: null,
+  player: null,
+  enemies: [],
+  projectiles: [],
+  hazards: [],
+  particles: [],
+  floats: [],
+  rings: [],
+  ashes: Array.from({ length: 42 }, () => ({ x: Math.random(), y: Math.random(), s: rand(1, 2.5), v: rand(8, 22) }))
+};
+
+function createPlayer(classId) {
+  const c = CLASSES[classId];
+  const maxHp = c.baseHp;
+  const maxEs = c.esPct ? Math.round(maxHp * c.esPct) : 0;
+  return {
+    cls: c, x: 0, y: 0, r: 13, face: 0,
+    lv: 1, xp: 0,
+    hp: maxHp, maxHp,
+    es: maxEs, maxEs, esDelay: 0,
+    mp: c.baseMp, maxMp: c.baseMp,
+    res: 0, resTimer: 0,
+    cds: [0, 0, 0, 0],
+    evadeCd: 0, invuln: 0, animSwing: 0, swingDir: 1, stride: 0,
+    dash: null, quicksilverT: 0,
+    flasks: [
+      { id: 'life',  charges: 45, max: 45, cost: 15, cd: 0 },
+      { id: 'mana',  charges: 40, max: 40, cost: 10, cd: 0 },
+      { id: 'quick', charges: 40, max: 40, cost: 20, cd: 0 }
+    ],
+    // 4 Linked Skill Groups (each has 1 Active Gem + up to 2 Support Gems)
+    links: [
+      { active: makeGemInstance(c.starterActives[0], 'active'), supports: [null, null] },
+      { active: makeGemInstance(c.starterActives[1], 'active'), supports: [null, null] },
+      { active: null, supports: [null, null] },
+      { active: null, supports: [null, null] }
+    ],
+    activeAuras: new Set(),
+    gemStash: [makeGemInstance(c.starterSupport, 'support')],
+    unseenGems: 1,
+    dead: false
+  };
+}
+
+function supportCapForPlayer(P) {
+  return P.lv >= 3 ? 2 : 1; // 1 Support socket at Lv 1, 2 Support sockets at Lv 3!
+}
+
+function getEffectiveStats() {
+  const P = State.player;
+  const purityOn = P.activeAuras.has('purity_frost');
+  const graceOn = P.activeAuras.has('grace_wind');
+  const maxHp = P.maxHp;
+  const maxEs = P.maxEs > 0 ? Math.round(P.maxEs * (purityOn ? 1.25 : 1)) : (purityOn ? Math.round(maxHp * 0.25) : 0);
+  const armor = P.cls.armor + (purityOn ? 15 : 0);
+  const evasion = Math.min(68, P.cls.evasion + (graceOn ? 22 : 0));
+  const moveMult = (P.quicksilverT > 0 ? 1.4 : 1) * (P.cls.id === 'strider' ? 1 + P.res * 0.08 : 1) * (graceOn ? 1.15 : 1);
+  const atkMult = (P.cls.id === 'strider' ? 1 + P.res * 0.1 : 1) * (graceOn ? 1.15 : 1);
+
+  let reservePct = 0;
+  for (const id of P.activeAuras) reservePct += ACTIVE_GEM_DEFS[id]?.reserve || 0;
+  const usableMp = Math.max(5, Math.floor(P.maxMp * Math.max(0.1, 1 - reservePct)));
+  return { maxHp, maxEs, armor, evasion, moveMult, atkMult, reservePct, usableMp };
+}
+
+function computeSkillStats(slotIdx) {
+  const P = State.player;
+  const grp = P.links[slotIdx];
+  if (!grp?.active) return null;
+  const def = ACTIVE_GEM_DEFS[grp.active.defId];
+  const gemLvBonus = 1 + (grp.active.lv - 1) * 0.12;
+  const heroLvBonus = 1 + (P.lv - 1) * 0.16;
+
+  let dmgMult = gemLvBonus * heroLvBonus;
+  let aoeMult = 1, cdMult = 1, mpMult = 1;
+  let extraProj = 0, chains = def.chains || 0, ignite = false, leech = 0;
+
+  const cap = supportCapForPlayer(P);
+  for (let i = 0; i < cap; i++) {
+    const sup = grp.supports[i];
+    if (!sup) continue;
+    const sd = SUPPORT_GEM_DEFS[sup.defId];
+    const supLvMult = 1 + (sup.lv - 1) * 0.05;
+    if (sd.dmgMult) dmgMult *= sd.dmgMult * supLvMult;
+    if (sd.aoeMult) aoeMult *= sd.aoeMult;
+    if (sd.cdMult)  cdMult *= sd.cdMult;
+    if (sd.mpMult)  mpMult *= sd.mpMult;
+    if (sd.extraProj) extraProj += sd.extraProj;
+    if (sd.chains) chains += sd.chains;
+    if (sd.ignite) ignite = true;
+    if (sd.leech) leech += sd.leech * supLvMult;
+  }
+
+  return {
+    def,
+    gem: grp.active,
+    dmg: (def.baseDmg || 0) * dmgMult,
+    radius: Math.round((def.radius || 0) * aoeMult),
+    cd: Math.max(0.16, def.cd * cdMult),
+    mp: Math.round((def.mp || 0) * mpMult),
+    proj: (def.proj || 0) + (def.proj ? extraProj : 0),
+    chains: chains + (!def.proj && def.chains ? extraProj : 0),
+    extraProj,
+    ignite,
+    leech
+  };
+}
+
+const isWall = (x, y) => {
+  if (!State.map) return true;
+  const gx = Math.floor(x / TILE), gy = Math.floor(y / TILE);
+  if (gx < 0 || gy < 0 || gx >= GRID || gy >= GRID) return true;
+  return State.map.tiles[gy * GRID + gx] === 0;
+};
+
+const fits = (x, y, r) => {
+  const k = r * 0.72;
+  return !(isWall(x - k, y - k) || isWall(x + k, y - k) || isWall(x - k, y + k) || isWall(x + k, y + k));
+};
+
+const moveSlide = (e, dx, dy) => {
+  if (fits(e.x + dx, e.y, e.r)) e.x += dx;
+  if (fits(e.x, e.y + dy, e.r)) e.y += dy;
+};
+
+const hasLOS = (a, b) => {
+  const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+  const steps = Math.ceil(d / 16);
+  for (let i = 1; i < steps; i++) {
+    if (isWall(a.x + (dx * i) / steps, a.y + (dy * i) / steps)) return false;
+  }
+  return true;
+};
+
+// ============================================================================
+// MODULE 6: LEVEL BUILDER & FLOOR WARDEN PACING
+// ============================================================================
+function spawnEnemy(typeKey, x, y, depth, isElite = false, isWarden = false) {
+  const base = ENEMY_TYPES[typeKey];
+  const scale = 1 + (depth - 1) * 0.28 + Math.pow(Math.max(0, depth - 5), 1.25) * 0.08;
+  const affix = (isElite || isWarden) ? ELITE_AFFIXES[randInt(0, ELITE_AFFIXES.length - 1)] : null;
+  const mh = Math.round(base.hp * scale * (isWarden ? 2.6 : isElite ? 2.0 : 1));
+  const dmg = Math.round(base.dmg * (1 + (depth - 1) * 0.16) * (isWarden ? 1.3 : isElite ? 1.2 : 1));
+  const spd = base.spd * (affix?.id === 'hasted' ? 1.35 : 1);
+  const act = getActInfo(depth);
+  return {
+    typeKey,
+    name: base.boss ? act.boss : isWarden ? `Warden · ${affix.name} ${base.name}` : affix ? `${affix.name} ${base.name}` : base.name,
+    x, y, r: base.r * (isWarden ? 1.22 : isElite ? 1.14 : 1),
+    hp: mh, maxHp: mh, dmg, spd, xp: Math.round(base.xp * (1 + (depth - 1) * 0.22) * (isWarden ? 2.6 : isElite ? 2.0 : 1)),
+    col: isWarden ? '#ffd06b' : affix ? affix.col : base.col,
+    range: base.range, brute: !!base.brute, boss: !!base.boss,
+    elite: isElite || isWarden, warden: isWarden, affix,
+    face: rand(0, Math.PI * 2),
+    awake: false, cd: rand(0.2, 0.8), affixCd: rand(1.5, 3.0),
+    flash: 0, stun: 0, chill: 0, igniteT: 0, igniteDps: 0, igniteTick: 0,
+    dotT: 0, dotDps: 0, dotTick: 0, shockT: 0,
+    windup: null, dead: false, deathFade: 0
+  };
+}
+
+function buildFloor(depth) {
+  State.depth = depth;
+  State.map = Dungeon.generate(depth);
+  State.enemies = [];
+  State.projectiles = [];
+  State.hazards = [];
+  State.particles = [];
+  State.floats = [];
+  State.rings = [];
+
+  const P = State.player;
+  P.x = State.map.start.x;
+  P.y = State.map.start.y;
+  P.dash = null;
+
+  const act = getActInfo(depth);
+  const rooms = State.map.rooms;
+  const wardenCount = State.map.bossFloor ? 0 : (depth === 1 ? 1 : 2);
+  let wardensPlaced = 0;
+
+  rooms.forEach((rm, idx) => {
+    if (idx === 0) return;
+    const isBossRoom = State.map.bossFloor && idx === rooms.length - 1;
+    const count = isBossRoom ? 4 : randInt(5, 7 + Math.min(5, depth));
+    for (let i = 0; i < count; i++) {
+      const roll = Math.random();
+      const tk = roll < 0.54 ? 'thrall' : roll < 0.8 ? 'acolyte' : 'hulker';
+      const ex = (rm.x + 1 + Math.random() * (rm.w - 2)) * TILE;
+      const ey = (rm.y + 1 + Math.random() * (rm.h - 2)) * TILE;
+      if (!fits(ex, ey, 18)) continue;
+
+      const makeWarden = !isBossRoom && i === 0 && wardensPlaced < wardenCount && (idx === rooms.length - 1 || idx === Math.floor(rooms.length / 2));
+      if (makeWarden) wardensPlaced++;
+      const elite = !isBossRoom && !makeWarden && i === 0 && (depth >= 2 || idx >= 3) && Math.random() < 0.55;
+      State.enemies.push(spawnEnemy(makeWarden ? 'hulker' : tk, ex, ey, depth, elite, makeWarden));
+    }
+    if (isBossRoom) {
+      const boss = spawnEnemy('boss', State.map.portal.x - 36, State.map.portal.y, depth, false, false);
+      State.enemies.push(boss);
+    }
+  });
+
+  // Guarantee at least 1 Warden on non-boss floors
+  if (!State.map.bossFloor && !State.enemies.some(e => e.warden)) {
+    const last = rooms[rooms.length - 1];
+    State.enemies.push(spawnEnemy('hulker', (last.cx + 0.5) * TILE - 32, (last.cy + 0.5) * TILE, depth, false, true));
+  }
+
+  document.getElementById('zoneLabel').textContent = act.name;
+  document.getElementById('depthPill').textContent = `Depth ${depth}`;
+  showBanner(State.map.bossFloor ? `Depth ${depth} · ${act.boss}` : `Depth ${depth} · ${act.name.split('· ')[1]}`);
+}
+
+function portalUnlocked() {
+  if (!State.map) return false;
+  if (State.map.bossFloor) return !State.enemies.some(e => e.boss && !e.dead);
+  return !State.enemies.some(e => e.warden && !e.dead);
+}
+
+function showBanner(text) {
+  const b = document.getElementById('banner');
+  b.textContent = text;
+  b.style.opacity = '1';
+  clearTimeout(b._t);
+  b._t = setTimeout(() => { b.style.opacity = '0'; }, 2400);
+}
+
+// ============================================================================
+// MODULE 7: VFX, GEM DROPS & COMBAT HELPERS
+// ============================================================================
+function addFloat(x, y, text, color = '#fff', size = 14) {
+  State.floats.push({ x, y, text: String(text), color, size, t: 0, life: 0.72, vx: rand(-18, 18) });
+  if (State.floats.length > 90) State.floats.shift();
+}
+
+function addRing(x, y, maxR, color, dur = 0.32) {
+  State.rings.push({ x, y, maxR, color, t: 0, dur });
+}
+
+function addBurst(x, y, color, count = 10, speed = 150, life = 0.38, size = 3) {
+  for (let i = 0; i < count; i++) {
+    const a = rand(0, Math.PI * 2), v = rand(speed * 0.35, speed);
+    State.particles.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, color, t: 0, life, size });
+  }
+  if (State.particles.length > 320) State.particles.splice(0, State.particles.length - 320);
+}
+
+function dropGemForPlayer(source) {
+  const P = State.player;
+  const ownedIds = new Set([
+    ...P.links.map(l => l.active?.defId).filter(Boolean),
+    ...P.links.flatMap(l => l.supports.map(s => s?.defId)).filter(Boolean),
+    ...P.gemStash.map(g => g.defId)
+  ]);
+
+  // Prioritize unlocking remaining class active gems first
+  const classActives = Object.values(ACTIVE_GEM_DEFS).filter(g => {
+    if (P.cls.id === 'dreadnought') return ['sunder_cleave','earthshatter','ancestral_leap','herald_ash'].includes(g.id);
+    if (P.cls.id === 'harbinger')   return ['blight_bolt','frost_pulse','void_conduit','purity_frost'].includes(g.id);
+    return ['split_arrow','snare_trap','rain_thorns','grace_wind'].includes(g.id);
+  });
+  const missingActive = classActives.find(g => !ownedIds.has(g.id));
+  const supList = Object.values(SUPPORT_GEM_DEFS);
+  const missingSup = supList.filter(s => !ownedIds.has(s.id));
+
+  let dropped = null;
+  if (missingActive && (source.warden || source.boss || Math.random() < 0.65)) {
+    dropped = makeGemInstance(missingActive.id, 'active');
+  } else if (missingSup.length) {
+    dropped = makeGemInstance(missingSup[randInt(0, missingSup.length - 1)].id, 'support');
+  } else {
+    const pick = supList[randInt(0, supList.length - 1)];
+    dropped = makeGemInstance(pick.id, 'support');
+  }
+
+  P.gemStash.push(dropped);
+  P.unseenGems++;
+  const def = dropped.kind === 'active' ? ACTIVE_GEM_DEFS[dropped.defId] : SUPPORT_GEM_DEFS[dropped.defId];
+  AudioSys.gemDrop();
+  addFloat(source.x, source.y - 26, `💎 ${def.name}`, '#7dffb3', 15);
+  showBanner(`Gem Found: ${def.name} (Press G)`);
+}
+
+function dealDamage(enemy, rawDmg, opts = {}) {
+  if (enemy.dead) return;
+  const P = State.player;
+  const critChance = P.cls.id === 'strider' ? 0.18 + P.res * 0.03 : 0.12;
+  const isCrit = !opts.dot && (opts.forceCrit || Math.random() < critChance);
+  const shockMult = enemy.shockT > 0 ? 1.2 : 1;
+  const dmg = Math.max(1, Math.round(rawDmg * shockMult * (isCrit ? 1.85 : 1) * rand(0.92, 1.08)));
+
+  enemy.hp -= dmg;
+  enemy.flash = 0.12;
+  enemy.awake = true;
+
+  if (opts.ignite) {
+    enemy.igniteT = Math.max(enemy.igniteT, 3.0);
+    enemy.igniteDps = Math.max(enemy.igniteDps, Math.round(dmg * 0.25));
+  }
+  if (opts.leech > 0 && !opts.dot) {
+    const heal = Math.max(1, Math.round(dmg * opts.leech));
+    P.hp = Math.min(P.maxHp, P.hp + heal);
+  }
+
+  if (!opts.dot) {
+    const pushA = Math.atan2(enemy.y - P.y, enemy.x - P.x);
+    moveSlide(enemy, Math.cos(pushA) * (enemy.boss ? 2 : 5), Math.sin(pushA) * (enemy.boss ? 2 : 5));
+    if (isCrit) { State.hitstop = 0.024; State.shake = Math.max(State.shake, 4.5); AudioSys.crit(); }
+    else { AudioSys.hit(); }
+  }
+
+  addFloat(enemy.x, enemy.y - enemy.r - 6, dmg + (isCrit ? '!' : ''), opts.color || (isCrit ? '#ffd978' : '#f7efe4'), isCrit ? 20 : 15);
+  addBurst(enemy.x, enemy.y, isCrit ? '#ffd978' : (opts.color || '#d9574e'), isCrit ? 11 : 5, 160, 0.25, isCrit ? 3.5 : 2.5);
+
+  if (enemy.hp <= 0) killEnemy(enemy);
+}
+
+function killEnemy(enemy) {
+  enemy.dead = true;
+  enemy.deathFade = 0.35;
+  AudioSys.hit();
+  addBurst(enemy.x, enemy.y, enemy.col, enemy.boss ? 42 : 16, 210, 0.5, 4);
+
+  const P = State.player;
+  // Herald of Ash Aura proc
+  if (P.activeAuras.has('herald_ash')) {
+    const burn = Math.max(12, Math.round(enemy.maxHp * 0.45));
+    addRing(enemy.x, enemy.y, 105, '#ff732e', 0.28);
+    for (const q of State.enemies) {
+      if (!q.dead && q !== enemy && dist(enemy, q) <= 105 + q.r) {
+        dealDamage(q, burn, { dot: true, ignite: true, color: '#ff8a3d' });
+      }
+    }
+  }
+
+  if (enemy.boss) {
+    addRing(enemy.x, enemy.y, 180, '#ff9d47', 0.55);
+    State.shake = 14;
+    showBanner(`${enemy.name} Slain · Descent Unlocked!`);
+  } else if (enemy.warden && portalUnlocked()) {
+    addRing(P.x, P.y, 130, '#ffd87a', 0.45);
+    showBanner(`Floor Wardens Slain · Descent Open!`);
+  }
+
+  if (enemy.affix?.id === 'molten') {
+    State.hazards.push({ kind: 'molten', x: enemy.x, y: enemy.y, r: 66, t: 0, dur: 1.15, dmg: enemy.dmg * 1.9, col: '#ff6d2e' });
+  }
+
+  // Drop Gems
+  const dropChance = enemy.boss ? 1 : enemy.warden ? 0.95 : enemy.elite ? 0.55 : 0.04;
+  if (Math.random() < dropChance) dropGemForPlayer(enemy);
+
+  // Refill Flask charges
+  const chargeGain = enemy.boss ? 25 : enemy.elite ? 12 : 4;
+  for (const f of P.flasks) f.charges = Math.min(f.max, f.charges + chargeGain);
+
+  // Grant Hero XP & Equipped Gem XP
+  gainXp(enemy.xp);
+  grantGemXp(Math.round(enemy.xp * 0.7));
+}
+
+function grantGemXp(amount) {
+  const P = State.player;
+  for (const grp of P.links) {
+    for (const g of [grp.active, ...grp.supports]) {
+      if (!g || g.lv >= 10) continue;
+      g.xp += amount;
+      while (g.lv < 10 && g.xp >= gemXpNeed(g.lv)) {
+        g.xp -= gemXpNeed(g.lv);
+        g.lv++;
+        const def = g.kind === 'active' ? ACTIVE_GEM_DEFS[g.defId] : SUPPORT_GEM_DEFS[g.defId];
+        addFloat(P.x, P.y - 36, `✦ ${def.name} Lv ${g.lv}`, '#82f5ff', 13);
+      }
+    }
+  }
+}
+
+function gainXp(amount) {
+  const P = State.player;
+  P.xp += amount;
+  while (P.xp >= xpNeeded(P.lv)) {
+    P.xp -= xpNeeded(P.lv);
+    P.lv++;
+    P.maxHp += P.cls.id === 'dreadnought' ? 22 : P.cls.id === 'strider' ? 16 : 13;
+    P.maxMp += P.cls.id === 'harbinger' ? 12 : 6;
+    if (P.cls.esPct) P.maxEs = Math.round(P.maxHp * P.cls.esPct);
+    const S = getEffectiveStats();
+    P.hp = S.maxHp; P.es = S.maxEs; P.mp = S.usableMp;
+    AudioSys.level();
+    addRing(P.x, P.y, 135, '#ffd87a', 0.5);
+    addBurst(P.x, P.y, '#ffd87a', 32, 240, 0.7, 3.5);
+    showBanner(P.lv === 3 ? `Level 3! 2nd Support Socket Unlocked!` : `Level ${P.lv} Reached!`);
+  }
+}
+
+function damagePlayer(rawDmg) {
+  const P = State.player;
+  if (P.dead || P.invuln > 0) return;
+  const S = getEffectiveStats();
+
+  if (Math.random() * 100 < S.evasion) {
+    addFloat(P.x, P.y - 22, 'EVADED', '#82f5aa', 13);
+    return;
+  }
+
+  const dmg = Math.max(1, Math.round(rawDmg * (1 - S.armor / (S.armor + 60 + P.lv * 3))));
+  let remaining = dmg;
+
+  if (P.es > 0) {
+    const absorbed = Math.min(P.es, remaining);
+    P.es -= absorbed;
+    remaining -= absorbed;
+  }
+  P.esDelay = 2.6;
+
+  if (remaining > 0) {
+    P.hp -= remaining;
+    AudioSys.hurt();
+    State.shake = Math.max(State.shake, 5);
+    addFloat(P.x, P.y - 22, `-${remaining}`, '#ff5c5c', 16);
+  } else {
+    addFloat(P.x, P.y - 22, `-${dmg} ES`, '#5ad1ff', 13);
+  }
+
+  P.invuln = 0.14;
+  if (P.hp <= 0) {
+    P.hp = 0; P.dead = true;
+    document.getElementById('deathInfo').textContent = `${P.cls.name} fell at Depth ${State.depth} (Level ${P.lv}).`;
+    document.getElementById('deathScreen').style.display = 'grid';
+  }
+}
+
+// ============================================================================
+// MODULE 8: INPUT & SKILL GEM EXECUTION
+// ============================================================================
+const keys = {};
+const mouse = { x: W / 2, y: H / 2, lmb: false, rmb: false };
+const worldMouse = () => ({ x: State.player.x + mouse.x - W / 2, y: State.player.y + mouse.y - H / 2 });
+
+addEventListener('keydown', e => {
+  if (!State.started) return;
+  const k = e.key.toLowerCase();
+  if (k === 'g' && !e.repeat) { toggleGemMenu(); return; }
+  if (e.key === 'Escape' && State.gemMenuOpen) { toggleGemMenu(false); return; }
+  if (State.gemMenuOpen || State.player?.dead) return;
+
+  keys[k] = true;
+  if (e.code === 'Space') { e.preventDefault(); triggerEvade(); }
+  if (k === 'q') castSkillSlot(2);
+  if (k === 'r') castSkillSlot(3);
+  if (k === '1') useFlask(0);
+  if (k === '2') useFlask(1);
+  if (k === '3') useFlask(2);
+  if (k === 'e' && !e.repeat) tryEnterPortal();
+});
+addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+canvas.addEventListener('pointermove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+canvas.addEventListener('pointerdown', e => {
+  if (!State.started || State.gemMenuOpen || State.player?.dead) return;
+  mouse.x = e.clientX; mouse.y = e.clientY;
+  if (e.button === 0) {
+    const wm = worldMouse();
+    if (portalUnlocked() && dist(wm, State.map.portal) < 40 && dist(State.player, State.map.portal) < 80) {
+      buildFloor(State.depth + 1);
+      return;
+    }
+    mouse.lmb = true;
+  }
+  if (e.button === 2) mouse.rmb = true;
+});
+addEventListener('pointerup', e => {
+  if (e.button === 0) mouse.lmb = false;
+  if (e.button === 2) mouse.rmb = false;
+});
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+function tryEnterPortal() {
+  if (portalUnlocked() && dist(State.player, State.map.portal) < 64) {
+    buildFloor(State.depth + 1);
+  }
+}
+
+function useFlask(idx) {
+  const P = State.player;
+  const f = P.flasks[idx];
+  const S = getEffectiveStats();
+  if (!f || f.cd > 0 || f.charges < f.cost) return;
+  if (idx === 0 && P.hp >= S.maxHp) return;
+  if (idx === 1 && P.mp >= S.usableMp) return;
+
+  f.charges -= f.cost;
+  f.cd = 0.45;
+  AudioSys.flask();
+
+  if (idx === 0) {
+    const heal = Math.round(S.maxHp * 0.42);
+    P.hp = Math.min(S.maxHp, P.hp + heal);
+    addFloat(P.x, P.y - 24, `+${heal} HP`, '#6eff87', 15);
+    addBurst(P.x, P.y, '#ff5c6c', 12, 120, 0.35, 3);
+  } else if (idx === 1) {
+    const mana = Math.round(S.usableMp * 0.6);
+    P.mp = Math.min(S.usableMp, P.mp + mana);
+    addFloat(P.x, P.y - 24, `+${mana} MP`, '#7bb4ff', 15);
+    addBurst(P.x, P.y, '#63a4ff', 12, 120, 0.35, 3);
+  } else {
+    P.quicksilverT = 3.5;
+    addRing(P.x, P.y, 65, '#8effc1', 0.35);
+    addFloat(P.x, P.y - 24, 'QUICKSILVER!', '#8effc1', 14);
+  }
+}
+
+function triggerEvade() {
+  const P = State.player;
+  if (P.dead || P.evadeCd > 0 || P.dash) return;
+  const dx = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0);
+  const dy = (keys.s || keys.arrowdown ? 1 : 0) - (keys.w || keys.arrowup ? 1 : 0);
+  const ang = (dx || dy) ? Math.atan2(dy, dx) : Math.atan2(worldMouse().y - P.y, worldMouse().x - P.x);
+
+  P.face = ang;
+  P.evadeCd = 2.4;
+  P.invuln = 0.28;
+  P.dash = { vx: Math.cos(ang) * 680, vy: Math.sin(ang) * 680, t: 0.2 };
+  AudioSys.dash();
+  addBurst(P.x, P.y, P.cls.accent, 14, 150, 0.28, 3);
+}
+
+function castSkillSlot(slotIdx) {
+  const P = State.player;
+  if (P.dead || P.dash || P.cds[slotIdx] > 0) return;
+  const st = computeSkillStats(slotIdx);
+  if (!st) return;
+
+  const { def } = st;
+  const S = getEffectiveStats();
+
+  // Aura toggle
+  if (def.aura) {
+    if (P.activeAuras.has(def.id)) P.activeAuras.delete(def.id);
+    else P.activeAuras.add(def.id);
+    P.cds[slotIdx] = 0.4;
+    const nextS = getEffectiveStats();
+    P.mp = Math.min(P.mp, nextS.usableMp);
+    P.es = Math.min(P.es, nextS.maxEs);
+    AudioSys.aura();
+    addRing(P.x, P.y, 85, '#c78aff', 0.3);
+    showBanner(`${def.name}: ${P.activeAuras.has(def.id) ? 'ON' : 'OFF'}`);
+    return;
+  }
+
+  if (P.mp < st.mp) return;
+  P.mp -= st.mp;
+  P.cds[slotIdx] = st.cd / S.atkMult;
+
+  const wm = worldMouse();
+  P.face = Math.atan2(wm.y - P.y, wm.x - P.x);
+  P.animSwing = 1;
+  P.swingDir *= -1;
+  const dmgOpts = { ignite: st.ignite, leech: st.leech };
+
+  switch (def.id) {
+    case 'sunder_cleave': {
+      AudioSys.swing();
+      let hits = 0;
+      for (const e of State.enemies) {
+        if (!e.dead && dist(P, e) <= st.radius + e.r && Math.abs(angleDiff(Math.atan2(e.y - P.y, e.x - P.x), P.face)) <= 1.25 && hasLOS(P, e)) {
+          dealDamage(e, st.dmg, dmgOpts);
+          hits++;
+        }
+      }
+      if (hits > 0) { P.res = Math.min(100, P.res + hits * 8); P.resTimer = 4.5; }
+      addRing(P.x + Math.cos(P.face) * 28, P.y + Math.sin(P.face) * 28, st.radius * 0.65, P.res >= 50 ? '#ff7d3b' : '#e8caa2', 0.2);
+      if (P.res >= 50) {
+        const waveCount = 1 + st.extraProj;
+        for (let k = 0; k < waveCount; k++) {
+          const ang = P.face + (k - (waveCount - 1) / 2) * 0.24;
+          State.projectiles.push({
+            fromPlayer: true, x: P.x + Math.cos(ang) * 20, y: P.y + Math.sin(ang) * 20,
+            vx: Math.cos(ang) * 440, vy: Math.sin(ang) * 440, r: 14, dmg: st.dmg * 0.8,
+            life: 0.45, col: '#ff8236', pierce: true, chainsLeft: st.chains, hitSet: new Set(), ...dmgOpts
+          });
+        }
+      }
+      break;
+    }
+    case 'earthshatter': {
+      const spentRage = Math.min(30, P.res);
+      P.res -= spentRage;
+      const rageBonus = 1 + (spentRage / 30) * 0.6;
+      AudioSys.slam();
+      State.shake = Math.max(State.shake, 9);
+      addRing(P.x, P.y, st.radius, '#ff9147', 0.35);
+      addBurst(P.x, P.y, '#ffb670', 26, 250, 0.42, 3.5);
+      for (const e of State.enemies) {
+        if (!e.dead && dist(P, e) <= st.radius + e.r && hasLOS(P, e)) {
+          dealDamage(e, st.dmg * rageBonus, dmgOpts);
+          if (!e.boss) e.stun = Math.max(e.stun, 1.1);
+        }
+      }
+      break;
+    }
+    case 'ancestral_leap': {
+      const d = Math.min(185, dist(P, wm));
+      const tx = P.x + Math.cos(P.face) * d, ty = P.y + Math.sin(P.face) * d;
+      for (let s = 1; s <= 12; s++) moveSlide(P, (tx - P.x) / 12, (ty - P.y) / 12);
+      P.invuln = Math.max(P.invuln, 0.3);
+      AudioSys.slam();
+      State.shake = Math.max(State.shake, 7);
+      addRing(P.x, P.y, st.radius, '#ffb35c', 0.32);
+      addBurst(P.x, P.y, '#ffd28a', 22, 220, 0.38, 3);
+      let hitAny = false;
+      for (const e of State.enemies) {
+        if (!e.dead && dist(P, e) <= st.radius + e.r && hasLOS(P, e)) {
+          dealDamage(e, st.dmg, dmgOpts);
+          hitAny = true;
+        }
+      }
+      if (hitAny) { P.res = Math.min(100, P.res + 18); P.resTimer = 4.5; }
+      break;
+    }
+    case 'blight_bolt': {
+      AudioSys.bolt();
+      const n = st.proj;
+      for (let k = 0; k < n; k++) {
+        const ang = P.face + (k - (n - 1) / 2) * 0.2;
+        State.projectiles.push({
+          fromPlayer: true, x: P.x + Math.cos(ang) * 16, y: P.y + Math.sin(ang) * 16,
+          vx: Math.cos(ang) * 520, vy: Math.sin(ang) * 520, r: 7, dmg: st.dmg,
+          life: 0.95, col: '#b86bff', aoe: st.radius, chainsLeft: st.chains, hitSet: new Set(),
+          chaosDot: st.dmg * 0.35, ...dmgOpts
+        });
+      }
+      break;
+    }
+    case 'frost_pulse': {
+      AudioSys.nova();
+      addRing(P.x, P.y, st.radius, '#6be0ff', 0.38);
+      addBurst(P.x, P.y, '#9cecff', 28, 240, 0.45, 3);
+      for (const e of State.enemies) {
+        if (!e.dead && dist(P, e) <= st.radius + e.r && hasLOS(P, e)) {
+          const wasChilled = e.chill > 0;
+          dealDamage(e, st.dmg * (wasChilled ? 1.4 : 1), { color: '#7be3ff', ...dmgOpts });
+          e.chill = 3.2;
+        }
+      }
+      break;
+    }
+    case 'void_conduit': {
+      AudioSys.lightning();
+      const maxTargets = 1 + st.chains;
+      const pool = State.enemies.filter(e => !e.dead && dist(P, e) <= st.radius && hasLOS(P, e))
+        .sort((a, b) => dist(P, a) - dist(P, b)).slice(0, maxTargets);
+      let prev = P;
+      for (const t of pool) {
+        addRing(t.x, t.y, 38, '#90d8ff', 0.22);
+        addBurst((prev.x + t.x) / 2, (prev.y + t.y) / 2, '#9ce8ff', 8, 120, 0.22, 2.5);
+        t.shockT = 4.0;
+        dealDamage(t, st.dmg, { color: '#8ae0ff', ...dmgOpts });
+        prev = t;
+      }
+      if (!pool.length) addRing(P.x + Math.cos(P.face) * 70, P.y + Math.sin(P.face) * 70, 50, '#8ae0ff', 0.2);
+      break;
+    }
+    case 'split_arrow': {
+      AudioSys.bow();
+      const n = st.proj;
+      for (let k = 0; k < n; k++) {
+        const ang = P.face + (k - (n - 1) / 2) * 0.13;
+        State.projectiles.push({
+          fromPlayer: true, x: P.x + Math.cos(ang) * 14, y: P.y + Math.sin(ang) * 14,
+          vx: Math.cos(ang) * 630, vy: Math.sin(ang) * 630, r: 4, dmg: st.dmg,
+          life: 0.75, col: '#8df5b2', arrow: true, gainFrenzy: true,
+          chainsLeft: st.chains, hitSet: new Set(), ...dmgOpts
+        });
+      }
+      break;
+    }
+    case 'snare_trap': {
+      const d = Math.min(200, dist(P, wm));
+      let tx = P.x + Math.cos(P.face) * d, ty = P.y + Math.sin(P.face) * d;
+      if (isWall(tx, ty)) { tx = P.x + Math.cos(P.face) * 40; ty = P.y + Math.sin(P.face) * 40; }
+      AudioSys.trap();
+      State.hazards.push({
+        kind: 'trap', x: tx, y: ty, r: st.radius, t: 0, dur: 0.42,
+        dmg: st.dmg * (1 + P.res * 0.12), col: '#82f5aa', ...dmgOpts
+      });
+      break;
+    }
+    case 'rain_thorns': {
+      const d = Math.min(210, dist(P, wm));
+      let tx = P.x + Math.cos(P.face) * d, ty = P.y + Math.sin(P.face) * d;
+      if (isWall(tx, ty)) { tx = P.x + Math.cos(P.face) * 60; ty = P.y + Math.sin(P.face) * 60; }
+      AudioSys.bow();
+      for (let w = 0; w < 3; w++) {
+        State.hazards.push({
+          kind: 'rain', x: tx + rand(-18, 18), y: ty + rand(-18, 18), r: st.radius,
+          t: -w * 0.28, dur: 0.22, dmg: st.dmg * 0.65, col: '#a8ff94', ...dmgOpts
+        });
+      }
+      break;
+    }
+  }
+}
+
+// ============================================================================
+// MODULE 9: UPDATE LOOP
+// ============================================================================
+function update(dt) {
+  if (!State.started || State.gemMenuOpen) return;
+  const P = State.player;
+  if (P.dead) return;
+  if (State.hitstop > 0) { State.hitstop -= dt; return; }
+
+  State.time += dt;
+  State.shake *= Math.pow(0.88, dt * 60);
+  const S = getEffectiveStats();
+
+  for (let i = 0; i < 4; i++) P.cds[i] = Math.max(0, P.cds[i] - dt);
+  P.evadeCd = Math.max(0, P.evadeCd - dt);
+  P.invuln = Math.max(0, P.invuln - dt);
+  P.animSwing = Math.max(0, P.animSwing - dt * 4.5);
+  P.quicksilverT = Math.max(0, P.quicksilverT - dt);
+  for (const f of P.flasks) f.cd = Math.max(0, f.cd - dt);
+
+  P.hp = Math.min(S.maxHp, P.hp + dt * (1.2 + S.maxHp * 0.004));
+  P.mp = Math.min(S.usableMp, P.mp + dt * (6 + P.maxMp * 0.055));
+
+  if (S.maxEs > 0) {
+    if (P.esDelay > 0) P.esDelay -= dt;
+    else P.es = Math.min(S.maxEs, P.es + dt * S.maxEs * 0.28);
+  }
+
+  // Purity of Frost passive chill pulse
+  if (P.activeAuras.has('purity_frost')) {
+    for (const e of State.enemies) {
+      if (!e.dead && dist(P, e) <= 135) e.chill = Math.max(e.chill, 0.5);
+    }
+  }
+
+  if (P.resTimer > 0) P.resTimer -= dt;
+  else if (P.res > 0) {
+    if (P.cls.id === 'dreadnought') P.res = Math.max(0, P.res - dt * 10);
+    else if (P.cls.id === 'strider') P.res = 0;
+  }
+
+  if (P.dash) {
+    P.dash.t -= dt;
+    moveSlide(P, P.dash.vx * dt, P.dash.vy * dt);
+    if (P.dash.t <= 0) P.dash = null;
+  } else {
+    const mx = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0);
+    const my = (keys.s || keys.arrowdown ? 1 : 0) - (keys.w || keys.arrowup ? 1 : 0);
+    if (mx || my) {
+      const len = Math.hypot(mx, my);
+      const spd = P.cls.speed * S.moveMult;
+      moveSlide(P, (mx / len) * spd * dt, (my / len) * spd * dt);
+      P.stride = (P.stride + dt * 11) % (Math.PI * 2);
+      if (!mouse.lmb && !mouse.rmb) P.face = Math.atan2(my, mx);
+    }
+    if (mouse.lmb) castSkillSlot(0);
+    if (mouse.rmb) castSkillSlot(1);
+  }
+
+  // Fog of War
+  const px = Math.floor(P.x / TILE), py = Math.floor(P.y / TILE);
+  for (let y = py - 8; y <= py + 8; y++) {
+    for (let x = px - 8; x <= px + 8; x++) {
+      if (x >= 0 && y >= 0 && x < GRID && y < GRID && (x - px) ** 2 + (y - py) ** 2 <= 64) {
+        State.map.seen[y * GRID + x] = 1;
+      }
+    }
+  }
+
+  // Enemies AI & Status
+  for (const e of State.enemies) {
+    if (e.dead) { e.deathFade = Math.max(0, e.deathFade - dt); continue; }
+    e.flash = Math.max(0, e.flash - dt);
+    e.chill = Math.max(0, e.chill - dt);
+    e.shockT = Math.max(0, e.shockT - dt);
+    e.cd = Math.max(0, e.cd - dt);
+
+    if (e.igniteT > 0) {
+      e.igniteT -= dt; e.igniteTick -= dt;
+      if (e.igniteTick <= 0) {
+        e.igniteTick = 0.5;
+        dealDamage(e, e.igniteDps, { dot: true, color: '#ff9642' });
+        if (e.dead) continue;
+      }
+    }
+    if (e.dotT > 0) {
+      e.dotT -= dt; e.dotTick -= dt;
+      if (e.dotTick <= 0) {
+        e.dotTick = 0.45;
+        dealDamage(e, e.dotDps, { dot: true, color: '#c47aff' });
+        if (e.dead) continue;
+      }
+    }
+
+    if (e.stun > 0) { e.stun -= dt; e.windup = null; continue; }
+
+    const d = dist(e, P), direct = d < 460 && hasLOS(e, P);
+    if (!e.awake) {
+      if (d < (e.boss ? 360 : 275) && direct) {
+        e.awake = true;
+        if (e.boss) { AudioSys.boss(); showBanner(`${e.name} Awakens!`); }
+      }
+      continue;
+    }
+
+    if (e.affix?.id === 'arcane' && direct) {
+      e.affixCd -= dt;
+      if (e.affixCd <= 0) {
+        e.affixCd = 6.5;
+        State.hazards.push({
+          kind: 'arcane', x: P.x + rand(-40, 40), y: P.y + rand(-40, 40),
+          angle: rand(0, Math.PI * 2), length: 115, t: 0, arm: 1.0, dur: 4.5, dmg: e.dmg * 0.75, tick: 0
+        });
+      }
+    }
+
+    if (e.windup) {
+      e.windup.t -= dt;
+      if (e.windup.t <= 0) {
+        const w = e.windup; e.windup = null;
+        if (w.kind === 'shot') {
+          State.projectiles.push({
+            fromPlayer: false, x: e.x, y: e.y,
+            vx: Math.cos(w.ang) * 320, vy: Math.sin(w.ang) * 320, r: 6, dmg: e.dmg, life: 1.5, col: '#c77aff'
+          });
+        } else if (w.kind === 'slam') {
+          addRing(w.x, w.y, w.r, '#ff683b', 0.28);
+          addBurst(w.x, w.y, '#ff8e52', 18, 190, 0.38, 3);
+          if (Math.hypot(P.x - w.x, P.y - w.y) <= w.r + P.r) damagePlayer(e.dmg * (e.boss ? 1.55 : 1.35));
+        } else if (w.kind === 'melee') {
+          if (dist(e, P) <= e.r + P.r + 22 && Math.abs(angleDiff(Math.atan2(P.y - e.y, P.x - e.x), w.ang)) <= 1.15) {
+            damagePlayer(e.dmg);
+          }
+        }
+      }
+      continue;
+    }
+
+    e.face = Math.atan2(P.y - e.y, P.x - e.x);
+    const spd = e.spd * (e.chill > 0 ? 0.52 : 1);
+
+    if (e.cd <= 0 && direct) {
+      if (e.range > 0 && d <= e.range) { e.windup = { kind: 'shot', t: 0.55, dur: 0.55, ang: e.face }; e.cd = 1.8; continue; }
+      if (e.boss && d <= 160 && Math.random() < 0.45) { e.windup = { kind: 'slam', t: 0.9, dur: 0.9, x: P.x, y: P.y, r: 96 }; e.cd = 2.4; continue; }
+      if (e.brute && d <= 92) { e.windup = { kind: 'slam', t: 0.78, dur: 0.78, x: P.x, y: P.y, r: 74 }; e.cd = 2.1; continue; }
+      if (d <= e.r + P.r + 14) { e.windup = { kind: 'melee', t: 0.42, dur: 0.42, ang: e.face }; e.cd = 1.15; continue; }
+    }
+
+    if (e.range > 0 && direct && d < e.range * 0.65) moveSlide(e, -Math.cos(e.face) * spd * 0.7 * dt, -Math.sin(e.face) * spd * 0.7 * dt);
+    else if (d > e.r + P.r + 6) moveSlide(e, Math.cos(e.face) * spd * dt, Math.sin(e.face) * spd * dt);
+  }
+
+  // Projectiles (with Chain Support!)
+  State.projectiles = State.projectiles.filter(p => {
+    p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.life <= 0 || isWall(p.x, p.y)) {
+      if (p.fromPlayer && p.aoe) explodeProj(p);
+      return false;
+    }
+    if (p.fromPlayer) {
+      for (const e of State.enemies) {
+        if (e.dead || dist(p, e) > e.r + p.r) continue;
+        if (p.hitSet && p.hitSet.has(e)) continue;
+        if (p.hitSet) p.hitSet.add(e);
+
+        if (p.aoe) explodeProj(p);
+        else {
+          dealDamage(e, p.dmg, { color: p.col, ignite: p.ignite, leech: p.leech });
+          if (p.gainFrenzy) { P.res = Math.min(3, P.res + 1); P.resTimer = 5.0; }
+        }
+
+        // Chain bounce logic
+        if (p.chainsLeft > 0) {
+          const next = State.enemies.filter(q => !q.dead && !p.hitSet.has(q) && dist(e, q) <= 220 && hasLOS(e, q))
+            .sort((a, b) => dist(e, a) - dist(e, b))[0];
+          if (next) {
+            p.chainsLeft--;
+            const speed = Math.hypot(p.vx, p.vy);
+            const ang = Math.atan2(next.y - p.y, next.x - p.x);
+            p.vx = Math.cos(ang) * speed;
+            p.vy = Math.sin(ang) * speed;
+            p.life = Math.max(p.life, 0.45);
+            addRing(e.x, e.y, 26, '#82d8ff', 0.16);
+            return true;
+          }
+        }
+        if (!p.pierce) return false;
+      }
+    } else if (dist(p, P) <= P.r + p.r) {
+      damagePlayer(p.dmg);
+      return false;
+    }
+    return true;
+  });
+
+  // Hazards
+  State.hazards = State.hazards.filter(h => {
+    h.t += dt;
+    if (h.kind === 'molten') {
+      if (h.t >= h.dur) {
+        addRing(h.x, h.y, h.r, '#ff6d2e', 0.3);
+        addBurst(h.x, h.y, '#ff9842', 22, 210, 0.4, 3.5);
+        AudioSys.slam();
+        if (dist(h, P) <= h.r + P.r) damagePlayer(h.dmg);
+        return false;
+      }
+      return true;
+    }
+    if (h.kind === 'trap' || h.kind === 'rain') {
+      if (h.t < 0) return true;
+      if (h.t >= h.dur) {
+        addRing(h.x, h.y, h.r, h.col, 0.28);
+        addBurst(h.x, h.y, h.col, 16, 190, 0.34, 3);
+        if (h.kind === 'trap') AudioSys.slam(); else AudioSys.hit();
+        for (const e of State.enemies) {
+          if (!e.dead && dist(h, e) <= h.r + e.r) {
+            dealDamage(e, h.dmg, { color: h.col, ignite: h.ignite, leech: h.leech });
+            e.chill = Math.max(e.chill, 2.5);
+          }
+        }
+        return false;
+      }
+      return true;
+    }
+    if (h.kind === 'arcane') {
+      if (h.t >= h.dur) return false;
+      if (h.t >= h.arm) {
+        h.angle += dt * 1.45;
+        h.tick -= dt;
+        if (h.tick <= 0) {
+          h.tick = 0.25;
+          const bx = Math.cos(h.angle), by = Math.sin(h.angle);
+          const dpx = P.x - h.x, dpy = P.y - h.y;
+          const proj = dpx * bx + dpy * by;
+          if (proj >= 0 && proj <= h.length && Math.abs(dpx * by - dpy * bx) <= P.r + 7) {
+            damagePlayer(h.dmg * 0.45);
+          }
+        }
+      }
+      return true;
+    }
+    return false;
+  });
+
+  State.particles = State.particles.filter(pt => { pt.t += dt; pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.vx *= 0.92; pt.vy *= 0.92; return pt.t < pt.life; });
+  State.rings = State.rings.filter(r => (r.t += dt) < r.dur);
+  State.floats = State.floats.filter(f => { f.t += dt; f.x += f.vx * dt; f.y -= 42 * dt; return f.t < f.life; });
+}
+
+function explodeProj(p) {
+  addRing(p.x, p.y, p.aoe, p.col, 0.26);
+  addBurst(p.x, p.y, p.col, 14, 180, 0.32, 3);
+  for (const e of State.enemies) {
+    if (!e.dead && dist(p, e) <= p.aoe + e.r) {
+      dealDamage(e, p.dmg, { color: p.col, ignite: p.ignite, leech: p.leech });
+      if (p.chaosDot) { e.dotT = 3.0; e.dotDps = p.chaosDot; e.dotTick = 0.35; }
+    }
+  }
+}
+
+// ============================================================================
+// MODULE 10: RENDERER & SKILL GEM UI
+// ============================================================================
+function render() {
+  ctx.fillStyle = '#070508';
+  ctx.fillRect(0, 0, W, H);
+  if (!State.map || !State.player) return;
+
+  const P = State.player;
+  const act = getActInfo(State.depth);
+  const shakeX = (Math.random() - 0.5) * State.shake;
+  const shakeY = (Math.random() - 0.5) * State.shake;
+  const camX = Math.round(W / 2 - P.x + shakeX);
+  const camY = Math.round(H / 2 - P.y + shakeY);
+
+  ctx.save();
+  ctx.translate(camX, camY);
+
+  const x0 = Math.max(0, Math.floor((P.x - W / 2) / TILE) - 1);
+  const x1 = Math.min(GRID - 1, Math.ceil((P.x + W / 2) / TILE) + 1);
+  const y0 = Math.max(0, Math.floor((P.y - H / 2) / TILE) - 1);
+  const y1 = Math.min(GRID - 1, Math.ceil((P.y + H / 2) / TILE) + 1);
+
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      const t = State.map.tiles[y * GRID + x];
+      const px = x * TILE, py = y * TILE;
+      if (t === 1) {
+        const checker = ((x * 7 + y * 13) & 3);
+        ctx.fillStyle = checker === 0 ? act.tint : checker === 1 ? '#29222d' : '#1f1a22';
+        ctx.fillRect(px, py, TILE, TILE);
+        ctx.strokeStyle = '#141016'; ctx.lineWidth = 1;
+        ctx.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
+      } else if (
+        State.map.tiles[y * GRID + x - 1] || State.map.tiles[y * GRID + x + 1] ||
+        State.map.tiles[(y - 1) * GRID + x] || State.map.tiles[(y + 1) * GRID + x]
+      ) {
+        ctx.fillStyle = '#382e3b'; ctx.fillRect(px, py - 10, TILE, TILE);
+        ctx.fillStyle = '#221b26'; ctx.fillRect(px, py + TILE - 10, TILE, 10);
+        ctx.fillStyle = '#6b566544'; ctx.fillRect(px + 2, py - 8, TILE - 4, 2);
+      }
+    }
+  }
+
+  for (const t of State.map.torches) {
+    if (Math.abs(t.x - P.x) > W / 2 + 120 || Math.abs(t.y - P.y) > H / 2 + 120) continue;
+    const flick = 1 + Math.sin(State.time * 10 + t.x) * 0.08;
+    const grad = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, 130 * flick);
+    grad.addColorStop(0, 'rgba(255,145,65,0.22)'); grad.addColorStop(1, 'rgba(255,100,30,0)');
+    ctx.fillStyle = grad; ctx.fillRect(t.x - 130, t.y - 130, 260, 260);
+    ctx.fillStyle = '#4a352b'; ctx.fillRect(t.x - 3, t.y - 8, 6, 12);
+    ctx.fillStyle = '#ffaa4a'; ctx.beginPath(); ctx.arc(t.x, t.y - 11, 4.5 * flick, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // Descent Portal
+  const unlocked = portalUnlocked();
+  const pt = State.map.portal;
+  ctx.save();
+  ctx.translate(pt.x, pt.y);
+  ctx.fillStyle = '#09070d';
+  ctx.beginPath(); ctx.ellipse(0, 0, 28, 16, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = unlocked ? '#f2be6b' : '#8c3b46'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(0, -14, 21, Math.PI, 0); ctx.stroke();
+  if (unlocked) {
+    ctx.globalAlpha = 0.45 + Math.sin(State.time * 4) * 0.2;
+    ctx.fillStyle = '#f2be6b'; ctx.beginPath(); ctx.arc(0, -10, 15, 0, Math.PI * 2); ctx.fill();
+  } else {
+    ctx.strokeStyle = '#a8474c'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(-12, -22); ctx.lineTo(12, -2); ctx.moveTo(12, -22); ctx.lineTo(-12, -2); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  ctx.font = '700 11px system-ui'; ctx.textAlign = 'center';
+  ctx.fillStyle = unlocked ? '#ffe0a3' : '#e08989';
+  ctx.fillText(unlocked ? `PRESS [E] · DEPTH ${State.depth + 1}` : (State.map.bossFloor ? 'LOCKED · DEFEAT ACT BOSS' : 'LOCKED · SLAY FLOOR WARDENS'), 0, -44);
+  ctx.restore();
+
+  // Hazards
+  for (const h of State.hazards) {
+    if (h.t < 0) continue;
+    ctx.save();
+    if (h.kind === 'molten' || h.kind === 'trap' || h.kind === 'rain') {
+      const pct = clamp(h.t / h.dur, 0, 1);
+      ctx.fillStyle = h.col + '25'; ctx.beginPath(); ctx.arc(h.x, h.y, h.r, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = h.col; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = h.col + '55'; ctx.beginPath(); ctx.arc(h.x, h.y, h.r * pct, 0, Math.PI * 2); ctx.fill();
+    } else if (h.kind === 'arcane') {
+      const armed = h.t >= h.arm;
+      ctx.translate(h.x, h.y);
+      ctx.fillStyle = '#c87aff'; ctx.beginPath(); ctx.arc(0, 0, armed ? 8 : 5, 0, Math.PI * 2); ctx.fill();
+      ctx.rotate(h.angle);
+      ctx.strokeStyle = armed ? '#e4adff' : '#9661bd88'; ctx.lineWidth = armed ? 6 : 2;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(h.length, 0); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // Enemies
+  for (const e of State.enemies) {
+    if (e.dead && e.deathFade <= 0) continue;
+    if (Math.abs(e.x - P.x) > W / 2 + 90 || Math.abs(e.y - P.y) > H / 2 + 90) continue;
+
+    if (!e.dead && e.windup) {
+      const w = e.windup, pct = 1 - w.t / w.dur;
+      ctx.save();
+      if (w.kind === 'slam') {
+        ctx.fillStyle = 'rgba(235,80,45,0.18)'; ctx.beginPath(); ctx.arc(w.x, w.y, w.r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ff9854'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.beginPath(); ctx.arc(w.x, w.y, w.r * pct, 0, Math.PI * 2); ctx.stroke();
+      } else if (w.kind === 'melee') {
+        ctx.translate(e.x, e.y); ctx.rotate(w.ang);
+        ctx.fillStyle = 'rgba(235,90,60,0.22)'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, e.r + P.r + 18, -1.1, 1.1); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    ctx.save();
+    ctx.globalAlpha = e.dead ? clamp(e.deathFade / 0.35, 0, 1) : 1;
+    ctx.translate(e.x, e.y);
+    ctx.fillStyle = '#0008'; ctx.beginPath(); ctx.ellipse(0, e.r * 0.78, e.r, e.r * 0.45, 0, 0, Math.PI * 2); ctx.fill();
+
+    if (e.elite) {
+      ctx.strokeStyle = e.warden ? '#ffd06b' : e.col; ctx.lineWidth = e.warden ? 3 : 2.2;
+      ctx.beginPath(); ctx.ellipse(0, e.r * 0.72, e.r * 1.4, e.r * 0.68, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+    if (e.shockT > 0) {
+      ctx.strokeStyle = '#7ad7ff'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(0, 0, e.r + 6, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    ctx.rotate(e.face);
+    ctx.fillStyle = e.flash > 0 ? '#ffffff' : e.chill > 0 ? '#7ad7ff' : e.col;
+    ctx.beginPath(); ctx.arc(0, 0, e.r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#151018'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = e.boss ? '#ffea80' : '#ff4d4d';
+    ctx.beginPath(); ctx.arc(e.r * 0.45, -e.r * 0.32, e.r * 0.16, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(e.r * 0.45, e.r * 0.32, e.r * 0.16, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    if (!e.dead && e.hp < e.maxHp && !e.boss) {
+      ctx.fillStyle = '#000b'; ctx.fillRect(e.x - e.r, e.y - e.r - 11, e.r * 2, 4);
+      ctx.fillStyle = e.warden ? '#ff5c8a' : e.elite ? '#ffd452' : '#d6333e';
+      ctx.fillRect(e.x - e.r, e.y - e.r - 11, e.r * 2 * clamp(e.hp / e.maxHp, 0, 1), 4);
+    }
+    if (!e.dead && (e.warden || e.elite)) {
+      ctx.font = '700 9px system-ui'; ctx.textAlign = 'center';
+      ctx.fillStyle = e.warden ? '#ffe082' : e.col;
+      ctx.fillText(e.warden ? `WARDEN · ${e.affix.name.toUpperCase()}` : e.affix.name.toUpperCase(), e.x, e.y - e.r - 15);
+    }
+  }
+
+  drawHero(P);
+
+  for (const p of State.projectiles) {
+    ctx.save(); ctx.translate(p.x, p.y); ctx.fillStyle = p.col;
+    if (p.arrow) {
+      ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillRect(-9, -1.5, 18, 3);
+      ctx.fillStyle = '#fff'; ctx.fillRect(5, -2, 5, 4);
+    } else {
+      ctx.shadowColor = p.col; ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, p.r * 0.45, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  for (const r of State.rings) {
+    const p = r.t / r.dur;
+    ctx.save(); ctx.globalAlpha = 1 - p; ctx.strokeStyle = r.color; ctx.lineWidth = 4 * (1 - p) + 1;
+    ctx.beginPath(); ctx.arc(r.x, r.y, r.maxR * p, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+  }
+  for (const pt2 of State.particles) {
+    const k = 1 - pt2.t / pt2.life; ctx.globalAlpha = k; ctx.fillStyle = pt2.color;
+    ctx.beginPath(); ctx.arc(pt2.x, pt2.y, pt2.size * k, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (const f of State.floats) {
+    ctx.globalAlpha = clamp(1 - (f.t / f.life) * 0.9, 0, 1);
+    ctx.font = `700 ${f.size}px system-ui`;
+    ctx.strokeStyle = '#120c14'; ctx.lineWidth = 3.5;
+    ctx.strokeText(f.text, f.x, f.y);
+    ctx.fillStyle = f.color; ctx.fillText(f.text, f.x, f.y);
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  const vig = ctx.createRadialGradient(W / 2, H / 2, 120, W / 2, H / 2, Math.max(W, H) * 0.62);
+  vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(4,3,6,0.82)');
+  ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
+
+  ctx.fillStyle = 'rgba(255,180,120,0.22)';
+  for (const a of State.ashes) {
+    ctx.fillRect(((a.x * W + State.time * a.v) % W), ((a.y * H - State.time * a.v * 0.6 + H * 10) % H), a.s, a.s);
+  }
+}
+
+function drawHero(P) {
+  const S = getEffectiveStats();
+  ctx.save(); ctx.translate(P.x, P.y);
+  if (P.activeAuras.size > 0) {
+    ctx.strokeStyle = 'rgba(205,140,255,0.38)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, 22 + Math.sin(State.time * 4) * 2, 0, Math.PI * 2); ctx.stroke();
+  }
+  if (P.es > 0) {
+    ctx.strokeStyle = 'rgba(90,209,255,0.72)'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(0, 0, P.r + 7, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.fillStyle = '#0009'; ctx.beginPath(); ctx.ellipse(0, 10, 16, 7, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.rotate(P.face);
+  const swingAngle = P.animSwing > 0 ? Math.sin((1 - P.animSwing) * Math.PI) * 1.45 * P.swingDir : 0;
+
+  ctx.fillStyle = P.cls.color; ctx.beginPath(); ctx.ellipse(-2, 0, 12, 15, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#18121c'; ctx.lineWidth = 2; ctx.stroke();
+
+  ctx.save(); ctx.translate(8, 9); ctx.rotate(swingAngle);
+  if (P.cls.id === 'dreadnought') {
+    ctx.fillStyle = '#73533d'; ctx.fillRect(-4, -2, 26, 4);
+    ctx.fillStyle = '#cdd6de'; ctx.fillRect(18, -9, 9, 18);
+  } else if (P.cls.id === 'harbinger') {
+    ctx.fillStyle = '#4f3a61'; ctx.fillRect(-4, -1.5, 28, 3);
+    ctx.fillStyle = '#6ce2ff'; ctx.beginPath(); ctx.arc(24, 0, 5, 0, Math.PI * 2); ctx.fill();
+  } else {
+    ctx.strokeStyle = '#c2a46d'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(4, -8, 15, -1.1, 1.1); ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.fillStyle = P.cls.id === 'dreadnought' ? '#a6b1bd' : '#2a2233';
+  ctx.beginPath(); ctx.arc(2, 0, 8.5, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#e6bd78'; ctx.lineWidth = 1.4; ctx.stroke();
+  ctx.restore();
+}
+
+function renderMinimap() {
+  if (!State.map || !State.player) return;
+  const s = mmCanvas.width / GRID;
+  mmCtx.clearRect(0, 0, mmCanvas.width, mmCanvas.height);
+  mmCtx.fillStyle = '#5e4c63';
+  for (let y = 0; y < GRID; y++) {
+    for (let x = 0; x < GRID; x++) {
+      const i = y * GRID + x;
+      if (State.map.seen[i] && State.map.tiles[i]) mmCtx.fillRect(x * s, y * s, s, s);
+    }
+  }
+  const sx = (State.map.portal.x / TILE) * s, sy = (State.map.portal.y / TILE) * s;
+  mmCtx.fillStyle = portalUnlocked() ? '#ffd278' : '#a8474c';
+  mmCtx.fillRect(sx - 3, sy - 3, 6, 6);
+
+  for (const e of State.enemies) {
+    if (e.dead || (!e.elite && !e.boss && !e.warden)) continue;
+    mmCtx.fillStyle = e.boss ? '#ff4757' : e.warden ? '#ff70c6' : '#ffc857';
+    mmCtx.fillRect((e.x / TILE) * s - 2.5, (e.y / TILE) * s - 2.5, 5, 5);
+  }
+  mmCtx.fillStyle = '#ffffff';
+  mmCtx.fillRect((State.player.x / TILE) * s - 2.5, (State.player.y / TILE) * s - 2.5, 5, 5);
+}
+
+function updateHud() {
+  const P = State.player;
+  if (!P) return;
+  const S = getEffectiveStats();
+
+  document.getElementById('hpGlobe').style.setProperty('--pct', clamp(P.hp / S.maxHp, 0, 1));
+  document.getElementById('mpGlobe').style.setProperty('--pct', clamp(P.mp / P.maxMp, 0, 1));
+  document.getElementById('mpReserve').style.height = `${Math.round(S.reservePct * 100)}%`;
+  document.getElementById('hpText').innerHTML = S.maxEs > 0 ? `${Math.ceil(P.hp)}<br><span style="color:#66e0ff;font-size:10px">${Math.ceil(P.es)} ES</span>` : Math.ceil(P.hp);
+  document.getElementById('mpText').textContent = Math.floor(P.mp);
+  document.getElementById('esOverlay').style.opacity = P.es > 0 ? '1' : '0';
+
+  document.getElementById('levelPill').textContent = `Lv ${P.lv}`;
+  document.getElementById('xpFill').style.width = `${clamp((P.xp / xpNeeded(P.lv)) * 100, 0, 100)}%`;
+
+  const badge = document.getElementById('gemBadge');
+  badge.style.display = P.unseenGems > 0 ? 'block' : 'none';
+  badge.textContent = P.unseenGems;
+
+  // Class Resource
+  const rVal = P.cls.id === 'harbinger' ? Math.ceil(P.es) : P.res;
+  const rMax = P.cls.id === 'harbinger' ? Math.max(1, S.maxEs) : P.cls.resMax;
+  document.getElementById('resourceFill').style.width = `${clamp((rVal / rMax) * 100, 0, 100)}%`;
+  document.getElementById('resourceNum').textContent = P.cls.id === 'strider' ? `${P.res}/3` : Math.floor(rVal);
+
+  // 4 Skill Slots + Support pips
+  for (let i = 0; i < 4; i++) {
+    const slotEl = document.getElementById(`slot${i}`);
+    const grp = P.links[i];
+    const actDef = grp.active ? ACTIVE_GEM_DEFS[grp.active.defId] : null;
+    slotEl.querySelector('span').textContent = actDef ? actDef.icon : '·';
+    slotEl.classList.toggle('emptySlot', !actDef);
+    slotEl.classList.toggle('activeAura', Boolean(actDef?.aura && P.activeAuras.has(actDef.id)));
+    const st = actDef ? computeSkillStats(i) : null;
+    slotEl.querySelector('.cdMask').style.setProperty('--cd', st ? clamp(P.cds[i] / st.cd, 0, 1) : 0);
+    slotEl.title = actDef ? `${actDef.name} (Gem Lv ${grp.active.lv})` : 'Empty Socket · Press G to equip a Skill Gem';
+
+    const cap = supportCapForPlayer(P);
+    slotEl.querySelector('.supDots').innerHTML = grp.supports.slice(0, cap).map(s => {
+      const col = s ? SUPPORT_GEM_DEFS[s.defId].color : '#221c26';
+      return `<i style="background:${col}"></i>`;
+    }).join('');
+  }
+  document.querySelector('#slotEvade .cdMask').style.setProperty('--cd', clamp(P.evadeCd / 2.4, 0, 1));
+
+  // Flasks
+  P.flasks.forEach((f, i) => {
+    const el = document.getElementById(`flask${i}`);
+    const uses = Math.floor(f.charges / f.cost);
+    el.style.setProperty('--chg', clamp(f.charges / f.max, 0, 1));
+    el.querySelector('.cnt').textContent = uses;
+    el.classList.toggle('empty', uses === 0);
+  });
+
+  // Objective & Portal Prompt
+  const unlocked = portalUnlocked();
+  const wardensLeft = State.enemies.filter(e => e.warden && !e.dead).length;
+  const totalWardens = State.enemies.filter(e => e.warden).length;
+  document.getElementById('objTitle').textContent = `Depth ${State.depth} Objective`;
+  document.getElementById('objDesc').textContent = State.map.bossFloor
+    ? (unlocked ? 'Act Boss defeated' : `Slay ${getActInfo(State.depth).boss}`)
+    : (unlocked ? 'Floor Wardens defeated' : `Floor Wardens (pink on map): ${totalWardens - wardensLeft}/${totalWardens}`);
+  document.getElementById('objState').textContent = unlocked ? '✦ Descent Portal Unlocked!' : 'Portal locked';
+
+  const pp = document.getElementById('portalPrompt');
+  const nearPortal = unlocked && dist(P, State.map.portal) < 64 && !P.dead;
+  pp.style.display = nearPortal ? 'block' : 'none';
+  if (nearPortal) pp.querySelector('span').textContent = `Descend to Depth ${State.depth + 1}`;
+
+  // Boss Bar
+  const boss = State.enemies.find(e => e.boss && !e.dead && e.awake);
+  const bBar = document.getElementById('bossBar');
+  if (boss) {
+    bBar.style.display = 'block';
+    bBar.querySelector('.bname').textContent = boss.name;
+    bBar.querySelector('.baffix').textContent = `Act ${getActInfo(State.depth).act} Boss · Telegraphed Slams`;
+    document.getElementById('bossFill').style.width = `${clamp((boss.hp / boss.maxHp) * 100, 0, 100)}%`;
+  } else {
+    bBar.style.display = 'none';
+  }
+}
+
+// ============================================================================
+// MODULE 11: GEM LINKING UI
+// ============================================================================
+function toggleGemMenu(force) {
+  State.gemMenuOpen = force !== undefined ? force : !State.gemMenuOpen;
+  const overlay = document.getElementById('gemOverlay');
+  overlay.style.display = State.gemMenuOpen ? 'grid' : 'none';
+  if (State.gemMenuOpen) {
+    State.player.unseenGems = 0;
+    mouse.lmb = mouse.rmb = false;
+    State.selectedSocket = null;
+    renderGemMenu();
+  }
+}
+
+function renderGemMenu() {
+  const P = State.player;
+  const keysLabel = ['LMB', 'RMB', 'Q', 'R'];
+  const cap = supportCapForPlayer(P);
+
+  const linksEl = document.getElementById('equippedLinks');
+  linksEl.innerHTML = P.links.map((grp, slotIdx) => {
+    const act = grp.active ? ACTIVE_GEM_DEFS[grp.active.defId] : null;
+    const st = act ? computeSkillStats(slotIdx) : null;
+    const selAct = State.selectedSocket?.slotIdx === slotIdx && State.selectedSocket.type === 'active';
+
+    const supHtml = [0, 1].map(supIdx => {
+      const locked = supIdx >= cap;
+      const sup = grp.supports[supIdx];
+      const sDef = sup ? SUPPORT_GEM_DEFS[sup.defId] : null;
+      const selSup = State.selectedSocket?.slotIdx === slotIdx && State.selectedSocket.type === 'sup' && State.selectedSocket.supIdx === supIdx;
+      return `<div class="linkChain"></div>
+        <button class="socketNode ${selSup ? 'selected' : ''} ${locked ? 'locked' : ''}" data-sock="${slotIdx}:sup:${supIdx}" ${locked ? 'disabled' : ''}>
+          <span>${locked ? '🔒' : sDef ? sDef.icon : '◇'}</span>
+          <div><b>${locked ? 'Lv 3 Unlock' : sDef ? `${sDef.name} (Lv ${sup.lv})` : 'Empty Support'}</b>
+          <small style="color:#a698a1">${locked ? 'Reach Lv 3' : sDef ? 'Click to swap/remove' : 'Link a Support Gem'}</small></div>
+        </button>`;
+    }).join('');
+
+    const statsLine = st ? (
+      st.def.aura
+        ? `Aura · Reserves ${Math.round(st.def.reserve * 100)}% Max Mana · ${st.def.desc}`
+        : `Dmg: <b style="color:#ffd87a">${Math.round(st.dmg)}</b> · CD: <b>${st.cd.toFixed(2)}s</b> · Mana: <b>${st.mp}</b>` +
+          (st.proj ? ` · Projectiles: <b style="color:#82f5aa">${st.proj}</b>` : '') +
+          (st.chains ? ` · Chains: <b style="color:#65bdff">${st.chains}</b>` : '') +
+          (st.ignite ? ` · <span style="color:#ff9447">Ignites</span>` : '') +
+          (st.leech ? ` · <span style="color:#ff7085">${Math.round(st.leech * 100)}% Leech</span>` : '')
+    ) : 'No Active Skill socketed — click the Active socket and choose a gem from your stash.';
+
+    return `<div class="linkRow">
+      <div class="linkTop">
+        <b>Slot ${slotIdx + 1} [${keysLabel[slotIdx]}]</b>
+        <span>${act ? `Gem Lv ${grp.active.lv} (${grp.active.xp}/${gemXpNeed(grp.active.lv)} XP)` : 'Empty'}</span>
+      </div>
+      <div class="socketsBar">
+        <button class="socketNode ${selAct ? 'selected' : ''}" data-sock="${slotIdx}:active:0">
+          <span>${act ? act.icon : '⬡'}</span>
+          <div><b>${act ? act.name : 'Empty Active'}</b><small style="color:#a698a1">${act ? act.tag : 'Click to equip'}</small></div>
+        </button>
+        ${supHtml}
+      </div>
+      <div class="linkStats">${statsLine}</div>
+    </div>`;
+  }).join('');
+
+  const stashEl = document.getElementById('gemStashList');
+  if (!P.gemStash.length) {
+    stashEl.innerHTML = '<p style="color:#a698a1;font-size:12px">Your Gem Stash is empty. Defeat Floor Wardens, Elites and Bosses to find new Active &amp; Support Gems!</p>';
+  } else {
+    stashEl.innerHTML = P.gemStash.map((g, idx) => {
+      const def = g.kind === 'active' ? ACTIVE_GEM_DEFS[g.defId] : SUPPORT_GEM_DEFS[g.defId];
+      return `<button class="gemItem" data-stash="${idx}">
+        <span class="gico">${def.icon}</span>
+        <div><b>${def.name} (Lv ${g.lv})</b><small>${def.desc}</small></div>
+        <span class="gemTag ${g.kind}">${g.kind}</span>
+      </button>`;
+    }).join('');
+  }
+}
+
+document.getElementById('equippedLinks').addEventListener('click', e => {
+  const btn = e.target.closest('[data-sock]');
+  if (!btn || btn.disabled) return;
+  const [slotStr, type, supStr] = btn.dataset.sock.split(':');
+  const slotIdx = +slotStr, supIdx = +supStr;
+  const P = State.player, grp = P.links[slotIdx];
+
+  // Clicking an already selected occupied socket unequips it to stash
+  if (State.selectedSocket && State.selectedSocket.slotIdx === slotIdx && State.selectedSocket.type === type && State.selectedSocket.supIdx === supIdx) {
+    if (type === 'active' && grp.active) {
+      if (slotIdx === 0) { showBanner('Slot 1 [LMB] must keep an Active Skill'); State.selectedSocket = null; renderGemMenu(); return; }
+      P.activeAuras.delete(grp.active.defId);
+      P.gemStash.push(grp.active);
+      grp.active = null;
+    } else if (type === 'sup' && grp.supports[supIdx]) {
+      P.gemStash.push(grp.supports[supIdx]);
+      grp.supports[supIdx] = null;
+    }
+    State.selectedSocket = null;
+    renderGemMenu();
+    return;
+  }
+
+  State.selectedSocket = { slotIdx, type, supIdx };
+  renderGemMenu();
+});
+
+document.getElementById('gemStashList').addEventListener('click', e => {
+  const btn = e.target.closest('[data-stash]');
+  if (!btn) return;
+  const idx = +btn.dataset.stash;
+  const P = State.player;
+  const gem = P.gemStash[idx];
+  if (!gem) return;
+
+  // Auto-target first matching empty slot if none selected
+  let target = State.selectedSocket;
+  if (!target) {
+    if (gem.kind === 'active') {
+      const emptyIdx = P.links.findIndex(l => !l.active);
+      target = { slotIdx: emptyIdx >= 0 ? emptyIdx : 2, type: 'active', supIdx: 0 };
+    } else {
+      const cap = supportCapForPlayer(P);
+      for (let s = 0; s < 4; s++) {
+        for (let k = 0; k < cap; k++) {
+          if (P.links[s].active && !P.links[s].supports[k]) { target = { slotIdx: s, type: 'sup', supIdx: k }; break; }
+        }
+        if (target) break;
+      }
+      if (!target) target = { slotIdx: 0, type: 'sup', supIdx: 0 };
+    }
+  }
+
+  if (gem.kind === 'active' && target.type !== 'active') { showBanner('Active Gems go into the left Active socket!'); return; }
+  if (gem.kind === 'support' && target.type !== 'sup') { showBanner('Support Gems go into the linked Support sockets!'); return; }
+
+  const grp = P.links[target.slotIdx];
+  P.gemStash.splice(idx, 1);
+
+  if (gem.kind === 'active') {
+    if (grp.active) { P.activeAuras.delete(grp.active.defId); P.gemStash.push(grp.active); }
+    grp.active = gem;
+  } else {
+    // Prevent duplicate support of same type on the same skill link
+    const dup = grp.supports.some((s, k) => k !== target.supIdx && s?.defId === gem.defId);
+    if (dup) { P.gemStash.splice(idx, 0, gem); showBanner('Cannot link two identical Support Gems to one skill'); return; }
+    if (grp.supports[target.supIdx]) P.gemStash.push(grp.supports[target.supIdx]);
+    grp.supports[target.supIdx] = gem;
+  }
+
+  AudioSys.gemDrop();
+  State.selectedSocket = null;
+  renderGemMenu();
+});
+
+// ============================================================================
+// MODULE 12: BOOTSTRAP & CLASS SELECTION
+// ============================================================================
+const choicesEl = document.getElementById('classChoices');
+Object.values(CLASSES).forEach(cls => {
+  const card = document.createElement('div');
+  card.className = 'clsCard';
+  card.innerHTML = `
+    <div class="head"><span class="emoji">${cls.emoji}</span><div><h2>${cls.name}</h2><div class="tag">${cls.tag}</div></div></div>
+    <p>${cls.desc}</p>
+    <ul>${cls.perks.map(p => `<li>${p}</li>`).join('')}</ul>
+    <button class="btnPrimary">Enter as ${cls.name}</button>
+  `;
+  card.querySelector('button').onclick = () => startGame(cls.id);
+  choicesEl.appendChild(card);
+});
+
+function startGame(classId) {
+  const P = createPlayer(classId);
+  State.player = P;
+  State.started = true;
+  document.getElementById('classOverlay').style.display = 'none';
+  document.getElementById('classPill').textContent = P.cls.name;
+  document.getElementById('resourceLabel').textContent = P.cls.resName;
+  document.getElementById('resourceFill').style.background = P.cls.resColor;
+  document.querySelector('#slotEvade span').textContent = P.cls.evadeIcon;
+  buildFloor(1);
+}
+
+document.getElementById('gemsBtn').onclick = () => toggleGemMenu();
+document.getElementById('closeGemsBtn').onclick = () => toggleGemMenu(false);
+document.getElementById('portalPrompt').onclick = tryEnterPortal;
+document.getElementById('slot2').onclick = () => castSkillSlot(2);
+document.getElementById('slot3').onclick = () => castSkillSlot(3);
+document.getElementById('slotEvade').onclick = triggerEvade;
+document.getElementById('flask0').onclick = () => useFlask(0);
+document.getElementById('flask1').onclick = () => useFlask(1);
+document.getElementById('flask2').onclick = () => useFlask(2);
+
+document.getElementById('respawnBtn').onclick = () => {
+  const P = State.player;
+  const S = getEffectiveStats();
+  P.dead = false;
+  P.hp = S.maxHp; P.es = S.maxEs; P.mp = S.usableMp;
+  P.x = State.map.start.x; P.y = State.map.start.y;
+  P.invuln = 1.5;
+  document.getElementById('deathScreen').style.display = 'none';
+};
+
+let lastTime = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, Math.max(0, (now - lastTime) / 1000));
+  lastTime = now;
+  update(dt);
+  render();
+  renderMinimap();
+  updateHud();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
