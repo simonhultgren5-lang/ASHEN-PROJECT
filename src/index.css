@@ -1,1 +1,194 @@
 @import "tailwindcss";
+
+:root {
+  --ae-bg: #07060a;
+  --ae-panel: #110e17;
+  --ae-surface: #17131f;
+  --ae-border: rgba(219, 179, 110, 0.22);
+  --ae-gold: #dfb672;
+  --ae-ivory: #f1e6d8;
+  --ae-muted: #9e91a3;
+}
+
+body {
+  background: var(--ae-bg);
+  color: var(--ae-ivory);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+.font-display {
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+.font-mono-num {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes depth-aura-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 8px rgba(255, 216, 122, 0.34),
+      0 0 18px rgba(242, 160, 74, 0.16),
+      inset 0 0 10px rgba(255, 216, 122, 0.16);
+  }
+  50% {
+    box-shadow:
+      0 0 14px rgba(255, 216, 122, 0.68),
+      0 0 26px rgba(242, 160, 74, 0.34),
+      inset 0 0 14px rgba(255, 216, 122, 0.3);
+  }
+}
+
+@keyframes depth-cleared-aura {
+  0%, 100% {
+    box-shadow:
+      0 0 7px rgba(130, 245, 170, 0.25),
+      inset 0 0 8px rgba(130, 245, 170, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 12px rgba(130, 245, 170, 0.5),
+      inset 0 0 12px rgba(130, 245, 170, 0.22);
+  }
+}
+
+@keyframes depth-aura-sweep {
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(220%) skewX(-18deg);
+  }
+}
+
+.depth-tile-unlocked {
+  position: relative;
+  overflow: hidden;
+  border-color: #dfb672;
+  background: radial-gradient(circle at 50% 30%, #33241c, #17121b 78%);
+  color: #ffe5ad;
+  animation: depth-aura-pulse 2.2s ease-in-out infinite;
+}
+
+.depth-tile-unlocked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, rgba(255, 232, 170, 0.2), transparent);
+  animation: depth-aura-sweep 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.depth-tile-cleared {
+  position: relative;
+  overflow: hidden;
+  border-color: #4c9a6a;
+  background: radial-gradient(circle at 50% 30%, #1c3426, #0f1713 82%);
+  color: #9afac0;
+  animation: depth-cleared-aura 2.8s ease-in-out infinite;
+}
+
+.depth-tile-current {
+  border-color: #ffd87a;
+  box-shadow:
+    0 0 16px rgba(255, 216, 122, 0.78),
+    0 0 28px rgba(255, 150, 66, 0.36),
+    inset 0 0 14px rgba(255, 216, 122, 0.34);
+}
+
+.depth-tile-locked {
+  position: relative;
+  overflow: hidden;
+  border-color: #29212f;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(14, 11, 18, 0.96) 0px,
+      rgba(14, 11, 18, 0.96) 6px,
+      rgba(35, 28, 41, 0.55) 6px,
+      rgba(35, 28, 41, 0.55) 8px
+    );
+  color: #6f6276;
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.92);
+  cursor: not-allowed;
+}
+
+.depth-tile-locked:hover {
+  border-color: #5c3a44;
+  color: #a67c85;
+}
+
+@keyframes socket-link-flow {
+  0% {
+    stroke-dashoffset: 36;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes socket-link-breathe {
+  0%, 100% {
+    opacity: 0.72;
+    filter: drop-shadow(0 0 5px rgba(255, 206, 112, 0.55));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 11px rgba(255, 224, 148, 0.92));
+  }
+}
+
+@keyframes socket-empowered-aura {
+  0%, 100% {
+    box-shadow:
+      0 0 10px rgba(255, 206, 112, 0.32),
+      inset 0 0 8px rgba(255, 206, 112, 0.16);
+  }
+  50% {
+    box-shadow:
+      0 0 18px rgba(255, 214, 128, 0.62),
+      inset 0 0 14px rgba(255, 214, 128, 0.28);
+  }
+}
+
+@keyframes socket-chain-shimmer {
+  0%, 100% {
+    stroke-opacity: 0.72;
+    filter: drop-shadow(0 0 3px rgba(255, 214, 128, 0.5));
+  }
+  50% {
+    stroke-opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(255, 228, 160, 0.95));
+  }
+}
+
+.socket-link-beam {
+  stroke-dasharray: 10 8;
+  animation: socket-link-flow 1.4s linear infinite;
+}
+
+.socket-link-empowered {
+  animation: socket-link-breathe 2s ease-in-out infinite;
+}
+
+.socket-chain-ring {
+  animation: socket-chain-shimmer 1.8s ease-in-out infinite;
+}
+
+.socket-empowered-ring {
+  animation: socket-empowered-aura 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .depth-tile-unlocked,
+  .depth-tile-unlocked::after,
+  .depth-tile-cleared,
+  .socket-link-beam,
+  .socket-link-empowered,
+  .socket-chain-ring,
+  .socket-empowered-ring {
+    animation: none;
+  }
+}
