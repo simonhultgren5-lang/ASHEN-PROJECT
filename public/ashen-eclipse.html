@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Ashen Eclipse — ARPG (Milestone 9)</title>
+<title>Ashen Eclipse</title>
 <style>
 :root{
   --bg:#08070a;--panel:#131018;--edge:#524150;--gold:#e6bd78;--ivory:#efe4d6;
@@ -159,7 +159,6 @@ canvas#game{position:fixed;inset:0;display:block;cursor:crosshair}
   background:#17131d;color:var(--ivory);font-size:12px}
 .gemItem .gmain{display:flex;align-items:center;gap:9px;flex:1;cursor:pointer;text-align:left}
 .gemItem .gmain:hover b{color:var(--gold)}
-.gemItem .gico{font-size:20px;width:28px;text-align:center}
 .gemItem b{display:block;font-size:12px}
 .gemItem small{display:block;font-size:11px;color:#b8aab8}
 .gemTag{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;text-transform:uppercase}
@@ -178,10 +177,16 @@ canvas#game{position:fixed;inset:0;display:block;cursor:crosshair}
   cursor:pointer;text-align:left;color:var(--ivory);min-height:52px;position:relative}
 .itemSlot:hover{border-color:#a88d68;background:#1d1724}
 .itemSlot.selected{outline:2px solid #ffd86b;outline-offset:1px}
-.itemSlot .iico{font-size:20px;width:28px;height:28px;display:grid;place-items:center;background:#0b090e;border:1px solid #3c3040;border-radius:4px;flex-shrink:0}
+.itemSlot[data-rarity], .wsCard[data-rarity] {
+  border-left: 2px solid var(--item-color);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--item-color) 8%, #191320), #15111b 73%);
+}
+.itemSlot[data-rarity]:hover, .wsCard[data-rarity]:hover {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--item-color) 15%, #231a29), #1b1520 73%);
+}
 .itemSlot .imeta{min-width:0;flex:1}
-.itemSlot .imeta b{display:block;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.itemSlot .imeta small{display:block;font-size:10px;color:#a89aa8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.itemSlot .imeta b{display:block;font-size:12px;overflow-wrap:anywhere}
+.itemSlot .imeta small{display:block;font-size:10px;color:#b8a9b8;overflow-wrap:anywhere}
 .bagGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-height:255px;overflow:auto;padding-right:3px;margin-bottom:10px}
 
 .orbPouch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:10px}
@@ -323,16 +328,172 @@ canvas#game{position:fixed;inset:0;display:block;cursor:crosshair}
   #controlsHint,#objHud{display:none}
   #minimap{width:92px;height:92px}
 }
+/* Obsidian and brass interface */
+:root{--gold:#efc88f;--edge:#66503c}
+#topHud,#objHud,.dockRow,#systemMenu,#encounterHud{background:linear-gradient(150deg,#252329f5,#100f16f5);border:1px solid #6f5943;box-shadow:inset 0 1px #f4d6a322,0 5px 18px #0009}
+#topHud{gap:7px;padding:7px 9px;border-left:3px solid #e9b571;z-index:32}
+#zoneLabel{font-size:14px}
+#systemMenu{position:absolute;left:-1px;top:calc(100% + 6px);width:min(340px,90vw);max-height:62vh;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px;border-radius:5px}
+#systemMenu[hidden],#encounterHud[hidden],#firstLink[hidden]{display:none}
+#systemMenu button{min-height:34px;text-align:left}
+button:focus-visible{outline:2px solid #ffe4ac;outline-offset:2px}
+#menuToggle,.hudBtn:hover{color:#fff1d8;border-color:#c79a64}
+#objHud{border-left:2px solid #dbad72}
+#encounterHud{position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:24;color:#f1cfff;border-color:#9f64bf;border-radius:3px;padding:6px 12px;font-weight:700;white-space:nowrap;pointer-events:none}
+#firstLink{white-space:normal;width:100%;text-align:left;padding:12px;line-height:1.6;border-color:#a3a778;margin-bottom:8px}
+.globe{border-color:#a38361;box-shadow:0 0 0 2px #241e22,inset 0 0 18px #000,0 5px 16px #000a}
+.dockRow{border-bottom:2px solid #b89260}
+.slot,.flask{border-radius:4px;border-color:#726051}
+#minimap{border-color:#a78862;outline:1px solid #352c29;outline-offset:2px}
+.overlay{background:radial-gradient(ellipse at 50% 15%,#3b2e30e8,#0b0a10f7 75%)}
+.modalCard{background:linear-gradient(135deg,#26222a,#16151c 55%,#201a20);border:1px solid #80674e;border-top:2px solid #d7ad74;border-radius:6px;scrollbar-color:#77604a #151218}
+#classOverlay .modalCard{background:radial-gradient(ellipse at 50% 0,#4a352c55,transparent 55%),linear-gradient(145deg,#23202a,#121017);padding:clamp(16px,3vw,38px)}
+#classOverlay h1{letter-spacing:.12em;font-weight:500}
+#classOverlay h1::before{content:"";display:block;margin:0 auto 14px;width:46px;height:46px;border:1px solid #f7ca8b;border-radius:50%;background:radial-gradient(circle at 63% 37%,#17131a 56%,#d79858 62%,#ffdfa4 70%);box-shadow:0 0 24px #de965e36}
+.clsCard{--classAccent:#d79471;background:linear-gradient(155deg,color-mix(in srgb,var(--classAccent) 14%,#19151c),#16141c 75%);border-top:2px solid var(--classAccent);padding:18px}
+.clsCard:nth-child(2){--classAccent:#ad98db}.clsCard:nth-child(3){--classAccent:#95bda6}
+.clsCard .tag{color:var(--classAccent)}.clsCard button{margin-top:auto}
+@media(max-width:780px){
+ #topHud{top:7px;left:7px;max-width:calc(100vw - 85px);gap:4px;padding:4px 6px}
+ #classPill{display:none}#zoneLabel{font-size:11px}
+ #minimap{width:62px;height:62px;top:8px;right:8px}
+ #objHud{display:block;top:70px;right:8px;width:auto;max-width:46vw;padding:3px 7px;font-size:10px}#objHud b{font-size:11px}
+ #hudBottom{gap:3px;bottom:7px}.dockRow{gap:2px;padding:4px}.divider{margin:0}
+ .globe{width:clamp(32px,9vw,54px);height:clamp(32px,9vw,54px)}
+ .slot,.flask{width:clamp(23px,7.5vw,36px);height:34px}.slot{font-size:14px}
+ #bossBar{top:116px}#encounterHud{top:auto;bottom:120px}#banner{top:27%;font-size:14px}
+ .modalCard{padding:13px}.overlay{padding:8px}
+}
+
+/* Eclipse visual treatment */
+#hudBottom { isolation: isolate; }
+#hudBottom::before {
+  content: ""; position: absolute; z-index: -1; inset: auto -32px -10px;
+  height: 88px; background: radial-gradient(ellipse at bottom, #08070eea, transparent 75%); pointer-events: none;
+}
+.dockRow { box-shadow: inset 0 0 18px #080611, inset 0 1px #ffd4a343, 0 5px 24px #000c; }
+.slot:not(.emptySlot) { background: radial-gradient(ellipse at center, #674739, #242031 55%, #12121b); }
+.slot:not(.emptySlot) span { filter: drop-shadow(0 0 6px #ffcc8b98); }
+.slot.activeAura { animation: eclipse-aura 2.4s ease-in-out infinite alternate; }
+@keyframes eclipse-aura { to { box-shadow: 0 0 16px #d28ef8b0, inset 0 0 14px #d28ef879; } }
+.globe { border-color: #a48263; outline: 2px solid #1a141e; }
+.globe::after { inset: 5% 16% 50%; opacity: .62; }
+#hpGlobe { box-shadow: 0 0 0 1px #edba8940, 0 0 18px #de3e553d, inset 0 0 9px #000; }
+#mpGlobe { box-shadow: 0 0 0 1px #edba8940, 0 0 18px #6a8fe447, inset 0 0 9px #000; }
+#bossBar { border-color: #bc7960; background: linear-gradient(#241923, #100d17); }
+#bossBar .bfill { box-shadow: inset 0 1px #ffe1a780; }
+@media (prefers-reduced-motion: reduce) { .slot.activeAura { animation: none; } }
+.classPortrait { flex-shrink: 0; width: clamp(54px, 7vw, 84px); height: auto; filter: drop-shadow(0 6px 8px #0009); }
+
+/* Ground loot inspection and pickup feedback */
+#lootPreview, #lootReceipt {
+  position: fixed;
+  color: #f6ece1;
+  border: 1px solid color-mix(in srgb, var(--loot-color) 46%, #220f25);
+  background: #15101b;
+  box-shadow: 0 12px 35px #000b;
+}
+#lootPreview[hidden], #lootReceipt[hidden], #lootPreview [hidden] { display: none; }
+#lootPreview {
+  z-index: 27;
+  left: 16px;
+  bottom: 108px;
+  width: min(342px, calc(100vw - 24px));
+  max-height: calc(100dvh - 165px);
+  display: flex;
+  flex-direction: column;
+  border-top: 3px solid var(--loot-color);
+  border-radius: 2px 2px 10px 2px;
+  overflow: hidden;
+  font-size: 12px;
+}
+.lootHeader {
+  padding: 12px 14px;
+  background: repeating-linear-gradient(133deg, #fff0 0 12px, #fff04a09 12px 13px),
+    linear-gradient(110deg, color-mix(in srgb, var(--loot-color) 13%, #1d1625), #211827);
+  border-bottom: 1px solid #fff2;
+}
+.lootMeta, #lootReceipt small {
+  color: #d9c6b6;
+  text-transform: uppercase;
+  letter-spacing: .11em;
+  font-size: 9px;
+  font-weight: 700;
+}
+.lootName, #lootReceipt strong {
+  color: var(--loot-color);
+  font: 700 20px/1.08 Georgia, serif;
+  overflow-wrap: anywhere;
+}
+.lootName { margin: 3px 0 5px; }
+.lootLevel { color: #cbbfcf; font-size: 11px; }
+.lootBody { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.lootBody:focus-visible { outline: 1px solid var(--loot-color); outline-offset: -1px; }
+.lootBase, .lootSockets, .lootAffixes { padding: 9px 13px; }
+.lootBase { display: grid; grid-template-columns: 1fr auto; gap: 1px 10px; align-items: baseline; }
+.lootBaseLabel { color: #d6c7d8; }
+.lootBaseValue { color: #fff1d4; font: 700 23px/1.1 Georgia, serif; }
+.lootCompare { grid-column: 1/-1; color: #bcb1c0; font-size: 11px; }
+.lootAffixes { list-style: none; margin: 0; display: grid; gap: 4px; }
+.lootBase:not([hidden]) + .lootAffixes { border-top: 1px solid #fff1; }
+.lootAffixes li { display: grid; grid-template-columns: 8px minmax(0,1fr); gap: 7px; align-items: baseline; }
+.lootAffixes li::before { content: ""; width: 4px; height: 4px; align-self: center; transform: rotate(45deg); background: var(--loot-color); }
+.lootPower {
+  margin: 2px 11px 8px; padding: 8px 10px;
+  border-left: 2px solid var(--loot-color); background: color-mix(in srgb, var(--loot-color) 8%, #201625);
+}
+.lootPower strong { color: var(--loot-color); font-size: 11px; }
+.lootPower p { margin: 2px 0 0; color: #f2e4e4; }
+.lootSockets { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; border-top: 1px solid #fff1; color: #d8c9d9; }
+.lootSocketGroups, .lootSocketGroup { display: flex; align-items: center; }
+.lootSocketGroups { gap: 7px; }
+.lootSocketGroup i { width: 9px; height: 9px; border-radius: 2px; border: 1px solid var(--socket-color); background: #0b0810; }
+.lootSocketGroup i + i { margin-left: 4px; position: relative; }
+.lootSocketGroup i + i::before { content: ""; position: absolute; width: 4px; height: 1px; background: #d1ab82; top: 3px; left: -5px; }
+#lootTake {
+  flex: none; min-height: 33px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  border: 0; border-top: 1px solid #ffffff24; color: #fff0d7; background: #29202d; cursor: pointer; font-weight: 700;
+}
+#lootTake:hover:not(:disabled) { background: color-mix(in srgb, var(--loot-color) 19%, #29202d); }
+#lootTake:focus-visible { outline-offset: -3px; }
+#lootTake:disabled { opacity: .58; cursor: default; }
+#lootTake kbd { padding: 0 6px; border: 1px solid #9b7858; border-radius: 3px; color: #ffe4b6; }
+#lootReceipt { left: 16px; top: 82px; z-index: 29; max-width: min(330px, calc(100vw - 32px)); padding: 7px 14px; pointer-events: none; border-left: 3px solid var(--loot-color); }
+#lootReceipt strong { display: block; margin-top: 3px; font-size: 16px; }
+.lootReceiptFlash { animation: loot-receipt .3s ease-out; }
+@keyframes loot-receipt { from { opacity: .3; transform: translateX(-10px); } }
+@media(max-width: 780px) {
+  #lootPreview { bottom: 91px; left: 8px; max-height: min(51dvh, calc(100dvh - 114px)); width: min(310px, calc(100vw - 16px)); }
+  .lootHeader { padding: 8px 10px; }
+  .lootName { font-size: 16px; }
+  #lootReceipt { left: 8px; top: 65px; }
+  #lootPreview:not([hidden]) + #actionPrompt { bottom: calc(91px + min(51dvh, 100dvh - 114px) + 5px); }
+}
+@media(prefers-reduced-motion: reduce) { .lootReceiptFlash { animation: none; } }
 </style>
+<link rel="stylesheet" href="./workshop.css">
+<link rel="stylesheet" href="./eclipse-presentation.css">
+<link rel="preload" as="image" href="./assets/eclipse-moor-key-art.png">
+<link rel="prefetch" as="image" href="./assets/eclipse-rift-key-art.png">
 </head>
 <body>
 <canvas id="game"></canvas>
+<section id="areaArrival" aria-live="polite">
+  <div class="arrivalBox">
+    <span class="arrivalSeal" aria-hidden="true"></span>
+    <span id="arrivalKind"></span>
+    <h2 id="arrivalName"></h2>
+    <p id="arrivalDetail"></p>
+  </div>
+</section>
 
 <div id="topHud">
   <span id="zoneLabel">Act I · The Forsaken Moor</span>
   <span class="pill" id="depthPill">Depth 1</span>
   <span class="pill gold" id="levelPill">Lv 1</span>
   <span class="pill" id="classPill">—</span>
+  <button id="menuToggle" class="hudBtn" aria-expanded="false" aria-controls="systemMenu">☰ Menu</button>
+  <nav id="systemMenu" aria-label="Game systems" hidden>
   <button class="hudBtn" id="invBtn">🎒 Gear &amp; Orbs (I)</button>
   <button class="hudBtn" id="gemsBtn">💎 Gems (G)<span class="badge" id="gemBadge"></span></button>
   <button class="hudBtn" id="passiveBtn">✨ Passives (P)<span class="badge" id="ptBadge"></span></button>
@@ -346,6 +507,9 @@ canvas#game{position:fixed;inset:0;display:block;cursor:crosshair}
   <button class="hudBtn" id="saveBtn" title="Save hero progress">💾 Save</button>
   <button class="hudBtn" id="filterBtn" title="Cycle ground loot filter">👁️ Filter: All</button>
   <button class="hudBtn" id="muteBtn" title="Toggle Sound Effects">🔊</button>
+  <button class="hudBtn" data-host-panel="ASHEN_OPEN_GEM_MANAGER" hidden>Socket Forge</button>
+  <button class="hudBtn" data-host-panel="ASHEN_OPEN_DEPTH_GATE" hidden>Depth Gate</button>
+  </nav>
 </div>
 
 <canvas id="minimap" width="136" height="136"></canvas>
@@ -357,12 +521,34 @@ canvas#game{position:fixed;inset:0;display:block;cursor:crosshair}
 </aside>
 
 <div id="bossBar">
-  <div class="bname">Boss</div>
+  <div class="bossHead"><div class="bname">Boss</div><span id="bossPercent"></span></div>
   <div class="baffix"></div>
   <div class="btrack"><div class="bfill" id="bossFill"></div></div>
 </div>
 
+<div id="encounterHud" hidden><span id="encounterLabel"></span><span class="encounterTrack" aria-hidden="true"><i></i></span></div>
 <div id="banner"></div>
+<div id="lootReceipt" role="status" hidden><small>Acquired</small><strong></strong></div>
+<section id="lootPreview" aria-labelledby="lootName" hidden>
+  <div class="lootHeader">
+    <div>
+      <span class="lootMeta"></span>
+      <h2 class="lootName" id="lootName"></h2>
+      <span class="lootLevel"></span>
+    </div>
+  </div>
+  <div class="lootBody" tabindex="0" aria-label="Item details">
+    <div class="lootBase">
+      <span class="lootBaseLabel"></span>
+      <strong class="lootBaseValue"></strong>
+      <span class="lootCompare"></span>
+    </div>
+    <ul class="lootAffixes"></ul>
+    <div class="lootPower"><strong></strong><p></p></div>
+    <div class="lootSockets"><span></span><div class="lootSocketGroups" aria-hidden="true"></div></div>
+  </div>
+  <button id="lootTake" type="button"><kbd>F</kbd><span>Pick up</span></button>
+</section>
 <button id="actionPrompt"><kbd>E</kbd><span>Interact</span></button>
 
 <div id="controlsHint">
@@ -408,8 +594,7 @@ canvas#game{position:fixed;inset:0;display:block;cursor:crosshair}
 <!-- Class Selection Overlay -->
 <section class="overlay" id="classOverlay">
   <div class="modalCard">
-    <h1>ASHEN ECLIPSE</h1>
-    <p class="sub">Milestone 9 · Pantheon Soul Blessings, Blood Ritual Altars &amp; Flask Enchanting</p>
+    <header class="titleHero"><h1>ASHEN ECLIPSE</h1><p class="sub">Choose your exile</p></header>
     <div id="continueBox">
       <div>
         <h3 id="continueTitle">Continue Saved Hero</h3>
@@ -550,28 +735,29 @@ canvas#game{position:fixed;inset:0;display:block;cursor:crosshair}
 </section>
 
 <!-- Targeted Crafting Bench & Flask Forge Overlay -->
-<section class="overlay" id="benchOverlay">
-  <div class="modalCard" style="width:min(960px,96vw)">
+<section class="overlay workOverlay" id="benchOverlay" aria-labelledby="benchTitle">
+  <div class="modalCard workCard">
     <div class="modalHeader">
       <div>
-        <h2>Sanctuary Crafting Bench &amp; Apothecary</h2>
-        <span style="color:#bfb2c2;font-size:12px" id="benchSubLabel">Enchant Flasks anytime with Alteration/Alchemy/Chaos Orbs, or craft Gear Mods (Lv 4/7/10).</span>
+        <h2 id="benchTitle">Sanctuary Workshop</h2>
       </div>
       <button class="hudBtn" id="closeBenchBtn">Close</button>
     </div>
     <div class="bestiaryTabs" id="benchTabs">
-      <button class="tabBtn active" data-btab-bench="gear">⚒️ Gear Bench Crafts</button>
-      <button class="tabBtn" data-btab-bench="flasks">🧪 Flask Enchanting</button>
+      <button class="tabBtn active" data-btab-bench="gear">Gear crafting</button>
+      <button class="tabBtn" data-btab-bench="flasks">Flask enchanting</button>
     </div>
+    <p class="workFeedback" id="benchFeedback" role="status" hidden></p>
     <div id="benchGearView" class="benchLayout">
-      <div>
-        <h3 class="panelSubTitle">Select Non-Corrupted Item</h3>
-        <div class="bagGrid" id="benchItemGrid" style="max-height:330px"></div>
-      </div>
-      <div>
-        <h3 class="panelSubTitle" id="benchTargetTitle">Targeted Bench Crafts</h3>
+      <section class="workPane benchStock">
+        <div class="workHeading"><h3>Choose equipment</h3></div>
+        <div class="bagGrid" id="benchItemGrid"></div>
+      </section>
+      <section class="workPane">
+        <div class="workHeading"><h3>Bench recipes</h3></div>
+        <div id="benchTargetTitle" class="benchTarget"></div>
         <div class="benchList" id="benchCraftList"></div>
-      </div>
+      </section>
     </div>
     <div id="benchFlaskView" style="display:none">
       <div class="flaskGrid" id="flaskForgeGrid"></div>
@@ -622,6 +808,7 @@ canvas#game{position:fixed;inset:0;display:block;cursor:crosshair}
       </div>
       <div>
         <h3 class="panelSubTitle">Gem Stash</h3>
+        <button class="hudBtn" id="firstLink" hidden></button>
         <div class="gemStash" id="gemStashList"></div>
       </div>
     </div>
@@ -629,36 +816,40 @@ canvas#game{position:fixed;inset:0;display:block;cursor:crosshair}
 </section>
 
 <!-- Inventory & Currency Crafting Overlay -->
-<section class="overlay" id="invOverlay">
-  <div class="modalCard" style="width:min(980px,96vw)">
-    <div class="modalHeader">
-      <div>
-        <h2>Equipment &amp; Currency Crafting</h2>
-        <span style="color:#bfb2c2;font-size:12px">Click an Orb to apply it to gear, or inspect items to Equip / Salvage into Orbs.</span>
-      </div>
-      <button class="hudBtn" id="closeInvBtn">Close (I)</button>
+<section class="overlay workOverlay" id="invOverlay" aria-labelledby="inventoryTitle">
+  <div class="modalCard workCard">
+    <header class="modalHeader workHeader">
+      <h2 id="inventoryTitle">Inventory</h2>
+      <button class="hudBtn" id="closeInvBtn">Close <kbd>I</kbd></button>
+    </header>
+    <div class="inventoryVitals">
+      <div class="statsGrid" id="heroStatsBox"></div>
+      <div class="resRow" id="heroResBox"></div>
     </div>
-    <div class="invLayout">
-      <div>
-        <h3 class="panelSubTitle">Hero Stats &amp; Resistances (Cap 75%)</h3>
-        <div class="statsGrid" id="heroStatsBox"></div>
-        <div class="resRow" id="heroResBox"></div>
-        <h3 class="panelSubTitle">Equipped Gear (10 Slots)</h3>
-        <div class="equipGrid" id="equipGrid"></div>
-      </div>
-      <div>
-        <h3 class="panelSubTitle">Currency Orbs (Click to Select &amp; Craft)</h3>
-        <div class="orbPouch" id="orbPouch"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
-          <h3 class="panelSubTitle" id="bagHeader" style="margin:0">Backpack (0/24)</h3>
-          <button class="hudBtn" id="salvageNormalsBtn" title="Salvage all Normal (White), uncorrupted Backpack items into Transmutation Orbs">♻️ Salvage Normals</button>
+    <p class="workFeedback" id="inventoryFeedback" role="status" hidden></p>
+    <div class="inventoryWork">
+      <section class="workPane">
+        <div class="workHeading">
+          <h3 id="bagHeader">Backpack (0/24)</h3>
+          <button class="hudBtn" id="salvageNormalsBtn" title="Salvage all uncorrupted Normal items into Transmutation Orbs">Salvage normals</button>
         </div>
+        <meter id="bagCapacity" min="0" max="24" value="0" aria-label="Backpack slots used"></meter>
         <div class="bagGrid" id="bagGrid"></div>
-        <div class="inspector" id="itemInspector">
-          <div style="color:#a698a1;font-size:12px">Select any Equipped or Backpack item to inspect, equip, salvage, or craft with Orbs.</div>
-        </div>
-      </div>
+      </section>
+      <section class="workPane inventoryDetails">
+        <div class="workHeading"><h3>Item details</h3></div>
+        <div class="inspector" id="itemInspector"></div>
+        <div id="orbTarget"></div>
+      </section>
+      <section class="workPane">
+        <div class="workHeading"><h3>Equipped gear</h3></div>
+        <div class="equipGrid" id="equipGrid"></div>
+      </section>
     </div>
+    <section class="workPane currencyPane">
+      <div class="workHeading"><h3>Currency</h3><span>Select an Orb to review its effect.</span></div>
+      <div class="orbPouch" id="orbPouch"></div>
+    </section>
   </div>
 </section>
 
@@ -691,6 +882,7 @@ canvas#game{position:fixed;inset:0;display:block;cursor:crosshair}
   </div>
 </section>
 
+<script src="./eclipse-art.js"></script>
 <script>
 (() => {
 'use strict';
@@ -900,7 +1092,7 @@ const ACTIVE_GEM_DEFS = {
   void_conduit:  { id: 'void_conduit',  name: 'Void Conduit',  icon: '⚡', tag: 'Chain · Lightning', mp: 16, cd: 2.8, dmgPct: 1.55, radius: 240, chains: 3, desc: 'Arcs across up to 4 targets, applying Shocked (+20% damage taken for 4s).' },
   purity_frost:  { id: 'purity_frost',  name: 'Purity of Frost',icon: '💠', tag: 'Aura · 25% Mana', mp: 0, cd: 0.6, aura: true, reserve: 0.25, desc: 'Aura: +25% Max Energy Shield, +15 Armor & +20% Cold Resistance.' },
 
-  split_arrow:   { id: 'split_arrow',   name: 'Split Arrow',   icon: '🏹', tag: 'Projectile · Bow', mp: 0, cd: 0.28, dmgPct: 0.72, proj: 3, desc: 'Fires a fan of arrows. Hits build Frenzy Charges (+10% Attack/Move Speed).' },
+  split_arrow:   { id: 'split_arrow',   name: 'Split Arrow',   icon: '🏹', tag: 'Projectile · Bow', mp: 0, cd: 0.28, dmgPct: 0.72, proj: 3, desc: 'Fires a fan of arrows and builds Frenzy Charges. In early acts, extra arrows hitting the same enemy from one volley deal less damage.' },
   snare_trap:    { id: 'snare_trap',    name: 'Snare Trap',    icon: '⚙️', tag: 'Trap · AoE', mp: 15, cd: 2.9, dmgPct: 2.1, radius: 98, desc: 'Tosses a trap that detonates for heavy damage (+12% per Frenzy Charge) and Chills.' },
   rain_thorns:   { id: 'rain_thorns',   name: 'Rain of Thorns',icon: '🌧️', tag: 'Barrage · AoE', mp: 20, cd: 4.2, dmgPct: 1.45, radius: 118, desc: 'Calls down 3 rapid waves of arrows at cursor.' },
   grace_wind:    { id: 'grace_wind',    name: 'Grace of Wind', icon: '🌪️', tag: 'Aura · 25% Mana', mp: 0, cd: 0.6, aura: true, reserve: 0.25, desc: 'Aura: +22% Evasion Chance, +15% Move Speed & +15% Attack Speed.' }
@@ -1158,7 +1350,7 @@ function syncGemHost() {
         id: slot,
         name: it.name,
         slot: SLOTS.find(s => s.id === slot)?.name || slot,
-        rarity: RARITY[it.rarity]?.name === 'Unique' ? 'Unique' : RARITY[it.rarity]?.name === 'Rare' ? 'Rare' : 'Magic',
+        rarity: RARITY[it.rarity]?.name || 'Normal',
         icon: it.icon,
         corrupted: !!it.corrupted,
         sockets: it.socketData.sockets.map(s => ({
@@ -1201,7 +1393,7 @@ const SLOTS = [
 ];
 
 const RARITY = [
-  { id: 0, name: 'Normal', color: '#d8d4de', beam: 0 },
+  { id: 0, name: 'Normal', color: '#d8d4de', beam: 22 },
   { id: 1, name: 'Magic',  color: '#63a8ff', beam: 36 },
   { id: 2, name: 'Rare',   color: '#ffd257', beam: 60 },
   { id: 3, name: 'Unique', color: '#f0863a', beam: 92 }
@@ -1291,21 +1483,46 @@ const UNIQUES = [
 const ORBS = [
   { id: 'transmute', name: 'Transmutation', icon: '🔵', desc: 'Normal → Magic (1–2 affixes)' },
   { id: 'alteration',name: 'Alteration',    icon: '💠', desc: 'Rerolls Magic item affixes' },
-  { id: 'alchemy',   name: 'Alchemy',       icon: '🟡', desc: 'Normal → Rare (4–6 affixes)' },
+  { id: 'alchemy',   name: 'Alchemy',       icon: '🟡', desc: 'Upgrades Normal gear to Rare. Affix limit depends on item level.' },
   { id: 'chaos',     name: 'Chaos Orb',     icon: '🟠', desc: 'Rerolls all Rare item affixes' },
-  { id: 'exalted',   name: 'Exalted Orb',   icon: '🌟', desc: 'Adds +1 affix to Rare (<6)' },
+  { id: 'exalted',   name: 'Exalted Orb',   icon: '🌟', desc: 'Adds one affix to Rare gear with room for another affix.' },
   { id: 'chromatic', name: 'Chromatic Orb', icon: '🎨', desc: 'Rerolls socket colors on gear' },
   { id: 'jeweller',  name: 'Jeweller’s Orb',icon: '💍', desc: 'Rerolls socket count (up to 4–6)' },
   { id: 'fusing',    name: 'Orb of Fusing', icon: '🔗', desc: 'Rerolls glowing links between sockets' },
   { id: 'vaal',      name: 'Vaal Orb',      icon: '🩸', desc: 'Corrupts item permanently!' }
 ];
 
+function rareGearAffixLimit(itemLevel) {
+  if (itemLevel <= 2) return 2;
+  if (itemLevel <= 5) return 3;
+  if (itemLevel <= 7) return 4;
+  if (itemLevel <= 9) return 5;
+  return 6;
+}
+
+const earlyGearProgress = depth => clamp((depth - 5) / 5, 0, 1);
+
+function rollGearAffix(modifier, itemLevel) {
+  const value = modifier.roll(itemLevel);
+  if (itemLevel >= 8) return value;
+  if (modifier.key === 'flatDmg') {
+    const cap = itemLevel <= 5 ? 3 + Math.floor((itemLevel - 1) / 2) : itemLevel;
+    return Math.min(value, cap);
+  }
+  const scale = 0.42 + itemLevel * 0.075;
+  const precision = modifier.key === 'crit' || modifier.key === 'lifeRegen' ? 10 : 1;
+  return Math.max(1 / precision, Math.round(value * scale * precision) / precision);
+}
+
 function rollAffixesForItem(item, prefixCount, suffixCount) {
-  const lv = item.ilvl || 1;
+  const itemLevel = item.ilvl || 1;
+  const limit = item.rarity === 2 ? rareGearAffixLimit(itemLevel) : itemLevel <= 2 ? 1 : 2;
+  const prefixes = Math.min(prefixCount, Math.ceil(limit / 2));
+  const suffixes = Math.min(suffixCount, limit - prefixes);
   const pPool = PREFIXES.filter(p => p.slots.includes(item.slot)).sort(() => Math.random() - 0.5);
   const sPool = SUFFIXES.filter(s => s.slots.includes(item.slot)).sort(() => Math.random() - 0.5);
-  item.prefixes = pPool.slice(0, prefixCount).map(p => ({ key: p.key, val: p.roll(lv) }));
-  item.suffixes = sPool.slice(0, suffixCount).map(s => ({ key: s.key, val: s.roll(lv) }));
+  item.prefixes = pPool.slice(0, prefixes).map(p => ({ key: p.key, val: rollGearAffix(p, itemLevel) }));
+  item.suffixes = sPool.slice(0, suffixes).map(s => ({ key: s.key, val: rollGearAffix(s, itemLevel) }));
 }
 
 function generateItem(depth, forceRarity = null, forceSlot = null, forceUniqueId = null) {
@@ -1318,9 +1535,12 @@ function generateItem(depth, forceRarity = null, forceSlot = null, forceUniqueId
   if (r === null) {
     const roll = Math.random();
     const corrMult = 1 + (State.corruption || 0) * 0.45;
-    const uniqChance = depth >= 3 ? (0.028 + Math.min(0.065, (depth - 2) * 0.004)) * corrMult : 0;
-    const rareChance = depth <= 2 ? 0.10 : 0.18 + Math.min(0.24, (depth - 2) * 0.015);
-    const magicChance = 0.42;
+    const progress = earlyGearProgress(depth);
+    const uniqueBase = 0.028 + Math.min(0.065, (depth - 2) * 0.004);
+    const rareBase = 0.18 + Math.min(0.24, (depth - 2) * 0.015);
+    const uniqChance = (depth < 4 ? 0 : 0.009 + (uniqueBase - 0.009) * progress) * corrMult;
+    const rareChance = depth <= 2 ? 0.03 : 0.08 + (rareBase - 0.08) * progress;
+    const magicChance = 0.33 + (0.42 - 0.33) * progress;
     r = roll < uniqChance ? 3 : roll < uniqChance + rareChance ? 2 : roll < uniqChance + rareChance + magicChance ? 1 : 0;
   }
 
@@ -1382,14 +1602,19 @@ function itemStatMap(item) {
   return m;
 }
 
-function formatAffixLines(item) {
+function formatBaseStatLines(item, excludedStat = null) {
   const lines = [];
-  if (item.baseStats?.minD) lines.push(`Weapon Damage: ${item.baseStats.minD}–${item.baseStats.maxD}`);
+  if (excludedStat !== 'minD' && item.baseStats?.minD) lines.push(`Weapon Damage: ${item.baseStats.minD}–${item.baseStats.maxD}`);
   for (const [k, v] of Object.entries(item.baseStats || {})) {
-    if (k === 'minD' || k === 'maxD') continue;
+    if (k === 'minD' || k === 'maxD' || k === excludedStat) continue;
     const meta = [...PREFIXES, ...SUFFIXES].find(x => x.key === k);
     lines.push(meta ? meta.label(v) : `+${v} ${k}`);
   }
+  return lines;
+}
+
+function formatAffixLines(item, includeBase = true) {
+  const lines = includeBase ? formatBaseStatLines(item) : [];
   if (item.implicit) {
     const meta = [...PREFIXES, ...SUFFIXES].find(x => x.key === item.implicit.key);
     lines.push(`✦ Corrupted: ${meta ? meta.label(item.implicit.val) : item.implicit.key}`);
@@ -1910,7 +2135,7 @@ const PASSIVE_NODES = [
     desc: 'JEWEL SOCKET: Allocate to socket any Crimson, Cobalt, Viridian or Prismatic Jewel.', mods: {}, links: ['ds_mid'] },
 
   // Center Convergence Star
-  { id: 'center_heart', x: 300, y: 258, kind: 'notable', icon: '☀️', name: 'Eclipse Convergence', col: '#ffdf85',
+  { id: 'center_heart', x: 300, y: 258, kind: 'notable', icon: '☀️', name: 'Eclipse Convergence', col: '#ffdf85', minLevel: 10, requiredBoss: 1,
     desc: 'CONVERGENCE: +24% Damage, +35 Life, +25 ES, +10% All Res, +8% Attack Speed.',
     mods: { pctDmg: 24, life: 35, es: 25, resFire: 10, resCold: 10, resLight: 10, resChaos: 10, atkSpd: 8 },
     links: ['h_aoe', 'dh_mid', 'hs_mid', 'ds_mid'] }
@@ -1962,7 +2187,14 @@ const mmCanvas = document.getElementById('minimap');
 const mmCtx = mmCanvas.getContext('2d');
 
 let W = innerWidth, H = innerHeight;
-const resize = () => { W = canvas.width = innerWidth; H = canvas.height = innerHeight; };
+const reducedEffects = matchMedia('(prefers-reduced-motion: reduce)');
+const resize = () => {
+  W = innerWidth; H = innerHeight;
+  const pixelScale = Math.min(1.5, devicePixelRatio || 1);
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  canvas.width = Math.round(W * pixelScale); canvas.height = Math.round(H * pixelScale);
+  ctx.setTransform(pixelScale, 0, 0, pixelScale, 0, 0);
+};
 addEventListener('resize', resize);
 resize();
 
@@ -2014,6 +2246,8 @@ const State = {
   particles: [],
   floats: [],
   rings: [],
+  spellEffects: [],
+  hurtGlow: 0,
   ashes: Array.from({ length: 40 }, () => ({ x: Math.random(), y: Math.random(), s: rand(1, 2.5), v: rand(8, 22) }))
 };
 
@@ -2032,7 +2266,7 @@ function createPlayer(classId, opts = {}) {
     socketData: {
       sockets: [
         { id: 'starter_s0', color: g0Col, gem: g0 },
-        { id: 'starter_s1', color: g1Col, gem: null },
+        { id: 'starter_s1', color: GEM_COLOR_BY_ID[c.starterSupport], gem: null },
         { id: 'starter_s2', color: g1Col, gem: g1 }
       ],
       links: [[0, 1]]
@@ -2319,7 +2553,9 @@ function computeSkillStats(slotIdx) {
   const S = getEffectiveStats();
   const def = ACTIVE_GEM_DEFS[grp.active.defId];
   const gemLvBonus = 1 + (grp.active.lv - 1) * 0.12;
-  const heroLvBonus = 1 + (P.lv - 1) * 0.08;
+  const levelsGained = P.lv - 1;
+  const earlyDamageReduction = Math.max(0, Math.min(levelsGained, 7, 16 - P.lv)) * 0.04;
+  const heroLvBonus = 1 + levelsGained * 0.08 - earlyDamageReduction;
 
   const avgBase = ((S.minD + S.maxD) / 2 + S.flatDmg) * (1 + S.pctDmg / 100);
   let dmgMult = gemLvBonus * heroLvBonus;
@@ -2346,11 +2582,14 @@ function computeSkillStats(slotIdx) {
     if (sd.leech) leech += sd.leech * supLvMult;
   }
 
+  const baseCooldown = def.id === 'split_arrow'
+    ? def.cd + 0.34 * (1 - clamp((P.lv - 8) / 12, 0, 1))
+    : def.cd;
   return {
     def, gem: grp.active,
     dmg: avgBase * (def.dmgPct || 1) * dmgMult,
     radius: Math.round((def.radius || 0) * aoeMult),
-    cd: Math.max(0.15, def.cd * cdMult),
+    cd: Math.max(0.15, baseCooldown * cdMult),
     mp: Math.round((def.mp || 0) * mpMult),
     proj: (def.proj || 0) + (def.proj ? extraProj : 0),
     chains: chains + (!def.proj && def.chains ? extraProj : 0),
@@ -2436,6 +2675,7 @@ function enterTown() {
   State.map = Dungeon.generateTown();
   State.enemies = []; State.lootDrops = []; State.projectiles = []; State.hazards = [];
   State.particles = []; State.floats = []; State.rings = [];
+  State.spellEffects = []; State.hurtGlow = 0;
 
   const P = State.player;
   P.x = State.map.start.x; P.y = State.map.start.y; P.dash = null;
@@ -2448,7 +2688,7 @@ function enterTown() {
   DungeonProgression.syncHost();
   document.getElementById('zoneLabel').textContent = 'Ashen Sanctuary · Safe Haven';
   document.getElementById('depthPill').textContent = 'Town';
-  showBanner('Entered Ashen Sanctuary (Auto-Saved)');
+  showAreaArrival('Safe haven', 'Ashen Sanctuary', 'Rest, reforge, and prepare for the descent');
 }
 
 function buildFloor(depth) {
@@ -2465,6 +2705,7 @@ function buildFloor(depth) {
   State.map = Dungeon.generate(depth);
   State.enemies = []; State.lootDrops = []; State.projectiles = []; State.hazards = [];
   State.particles = []; State.floats = []; State.rings = [];
+  State.spellEffects = []; State.hurtGlow = 0;
 
   const P = State.player;
   P.x = State.map.start.x; P.y = State.map.start.y; P.dash = null;
@@ -2500,7 +2741,8 @@ function buildFloor(depth) {
   DungeonProgression.syncHost();
   document.getElementById('zoneLabel').textContent = act.name;
   document.getElementById('depthPill').textContent = `Depth ${depth}`;
-  showBanner(State.map.bossFloor ? `Depth ${depth} · ${act.boss}` : `Depth ${depth} · ${act.name.split('· ')[1]}`);
+  const [actTitle, region] = act.name.split(' · ');
+  showAreaArrival(actTitle + ' · Depth ' + depth, region, State.map.bossFloor ? 'Confront ' + act.boss : 'Defeat the wardens to open the descent');
   return true;
 }
 
@@ -2518,6 +2760,7 @@ function buildAtlasMap(ws) {
   State.map.isAtlas = true;
   State.enemies = []; State.lootDrops = []; State.projectiles = []; State.hazards = [];
   State.particles = []; State.floats = []; State.rings = [];
+  State.spellEffects = []; State.hurtGlow = 0;
 
   const P = State.player;
   P.x = State.map.start.x; P.y = State.map.start.y; P.dash = null;
@@ -2545,7 +2788,7 @@ function buildAtlasMap(ws) {
   saveHero(true);
   document.getElementById('zoneLabel').textContent = `Atlas · ${ws.name}`;
   document.getElementById('depthPill').textContent = `T${ws.tier} Map`;
-  showBanner(`Atlas Opened: ${ws.name}`);
+  showAreaArrival('Atlas · Tier ' + ws.tier, ws.name, 'Defeat the map boss to open the return portal');
 }
 
 function spawnDelveWave(wave) {
@@ -2584,6 +2827,7 @@ function buildDelve(delveDepth) {
   State.map = Dungeon.generateDelve(delveDepth);
   State.enemies = []; State.lootDrops = []; State.projectiles = []; State.hazards = [];
   State.particles = []; State.floats = []; State.rings = [];
+  State.spellEffects = []; State.hurtGlow = 0;
 
   const P = State.player;
   P.delveDepth = delveDepth;
@@ -2592,6 +2836,7 @@ function buildDelve(delveDepth) {
   saveHero(true);
   document.getElementById('zoneLabel').textContent = `Abyssal Delve · Endless Rift`;
   document.getElementById('depthPill').textContent = `Delve ${delveDepth}`;
+  showAreaArrival('Delve · Depth ' + delveDepth, 'Endless Rift', 'Survive three waves');
 }
 
 function buildPinnacleArena(uberId) {
@@ -2613,6 +2858,7 @@ function buildPinnacleArena(uberId) {
   State.map = Dungeon.generatePinnacle(uberId);
   State.enemies = []; State.lootDrops = []; State.projectiles = []; State.hazards = [];
   State.particles = []; State.floats = []; State.rings = [];
+  State.spellEffects = []; State.hurtGlow = 0;
 
   P.x = State.map.start.x; P.y = State.map.start.y; P.dash = null;
   const rm = State.map.rooms[0];
@@ -2633,7 +2879,7 @@ function buildPinnacleArena(uberId) {
   saveHero(true);
   document.getElementById('zoneLabel').textContent = `Pinnacle Sanctum · ${def.name}`;
   document.getElementById('depthPill').textContent = `Uber`;
-  showBanner(`${def.icon} ${def.name} Awakens!`);
+  showAreaArrival('Pinnacle Sanctum', def.name, 'Pinnacle encounter');
   return true;
 }
 
@@ -2643,6 +2889,26 @@ const portalUnlocked = () => {
   if (State.map.isDelve) return State.map.delveWave >= 3 && !State.enemies.some(e => !e.dead);
   return State.map.bossFloor ? !State.enemies.some(e => e.boss && !e.dead) : !State.enemies.some(e => e.warden && !e.dead);
 };
+
+const arrivalCard = document.getElementById('areaArrival');
+let arrivalHoldUntil = 0;
+function showAreaArrival(kind, name, detail) {
+  const banner = document.getElementById('banner');
+  clearTimeout(banner._t);
+  banner.style.opacity = '0';
+  arrivalCard.dataset.realm = !State.inTown && State.depth >= 16 ? 'rift' : 'moor';
+  document.getElementById('arrivalKind').textContent = kind;
+  document.getElementById('arrivalName').textContent = name;
+  document.getElementById('arrivalDetail').textContent = detail;
+  arrivalCard.classList.remove('is-arriving');
+  void arrivalCard.offsetWidth;
+  arrivalCard.classList.add('is-arriving');
+  clearInputState();
+  arrivalHoldUntil = performance.now() + (reducedEffects.matches ? 310 : 730);
+}
+arrivalCard.addEventListener('animationend', event => {
+  if (event.animationName === 'area-arrival') arrivalCard.classList.remove('is-arriving');
+});
 
 function showBanner(text) {
   const b = document.getElementById('banner');
@@ -2658,6 +2924,10 @@ function addFloat(x, y, text, color = '#fff', size = 14) {
   if (State.floats.length > 90) State.floats.shift();
 }
 function addRing(x, y, maxR, color, dur = 0.32) { State.rings.push({ x, y, maxR, color, t: 0, dur }); }
+function addSpellEffect(kind, x, y, color, radius, duration, angle = 0) {
+  if (State.spellEffects.length >= 48) State.spellEffects.shift();
+  State.spellEffects.push({kind, x, y, color, radius, duration, angle, t:0});
+}
 function addBurst(x, y, color, count = 10, speed = 150, life = 0.38, size = 3) {
   for (let i = 0; i < count; i++) {
     const a = rand(0, Math.PI * 2), v = rand(speed * 0.35, speed);
@@ -2739,18 +3009,32 @@ function dropLootFromEnemy(e) {
 
   // 1. Gear drop (Uber bosses drop their own guaranteed Pinnacle loot in killEnemy)
   if (!e.uber) {
-    const gearRoll = e.boss ? 2 : e.warden ? 1 : (e.elite && Math.random() < 0.60 * quantMult) ? 1 : (Math.random() < 0.13 * quantMult ? 1 : 0);
+    const depth = State.depth;
+    const earlyCampaign = depth < 10 && !State.map?.isAtlas && !State.map?.isDelve;
+    const progress = earlyGearProgress(depth);
+    const rollChance = e.warden ? (depth === 1 ? 1 : 0.60 + 0.40 * progress)
+      : e.elite ? 0.16 + (0.652 - 0.16) * progress : 0.03 + (0.13 - 0.03) * progress;
+    const gearRoll = earlyCampaign
+      ? (e.boss || Math.random() < rollChance * quantMult ? 1 : 0)
+      : e.boss ? 2 : e.warden ? 1 : (e.elite && Math.random() < 0.60 * quantMult) ? 1 : (Math.random() < 0.13 * quantMult ? 1 : 0);
     for (let i = 0; i < gearRoll; i++) {
       const uniqScale = (1 + corr * 0.45) * ssfRarity;
-      const forceR = e.boss ? (State.depth >= 3 && Math.random() < 0.35 * uniqScale ? 3 : 2) : e.warden ? (State.depth >= 3 && Math.random() < 0.14 * uniqScale ? 3 : 2) : null;
-      const item = ensureItemSockets(generateItem(State.depth, forceR));
+      let forceR = null;
+      if (e.boss) forceR = depth >= 3 && Math.random() < (earlyCampaign ? 0.1 : 0.35) * uniqScale ? 3 : 2;
+      else if (e.warden) {
+        forceR = earlyCampaign
+          ? (depth >= 2 && Math.random() < (0.12 + depth * 0.08) * ssfRarity ? 2 : 1)
+          : (depth >= 3 && Math.random() < 0.14 * uniqScale ? 3 : 2);
+      }
+      const item = ensureItemSockets(generateItem(depth, forceR));
       State.lootDrops.push({ kind: 'item', x: e.x + rand(-24, 24), y: e.y + rand(-20, 20), item, t: 0 });
       if (item.rarity >= 2) AudioSys.loot(item.rarity === 3);
     }
   }
 
   // 2. PoE Currency Orb drop (Depth-gated economy)
-  const orbChance = (e.boss ? 1.0 : e.warden ? 0.82 : e.elite ? 0.32 : 0.04) * orbMult;
+  const progress = earlyGearProgress(State.depth);
+  const orbChance = (e.boss ? 1 : e.warden ? 0.82 : e.elite ? 0.20 + 0.12 * progress : 0.025 + 0.015 * progress) * orbMult;
   if (Math.random() < orbChance) {
     const orbId = rollOrbByDepth(State.depth, !!(e.boss || e.warden), !!P.modes?.ssf);
     State.lootDrops.push({ kind: 'orb', x: e.x + rand(-18, 18), y: e.y + rand(-18, 18), orbId, t: 0 });
@@ -2839,6 +3123,10 @@ function dealDamage(enemy, rawDmg, opts = {}) {
   addFloat(enemy.x, enemy.y - enemy.r - 6, (blocked ? '🛡 ' : '') + dmg + (isCrit && !blocked ? '!' : ''), blocked ? '#98a6b8' : opts.color || (isCrit ? '#ffd978' : '#f7efe4'), isCrit && !blocked ? 20 : 15);
   addBurst(enemy.x, enemy.y, blocked ? '#b5c3d4' : isCrit ? '#ffd978' : (opts.color || '#d9574e'), isCrit ? 11 : 5, 160, 0.25, isCrit ? 3.5 : 2.5);
 
+  if (!opts.dot && (!reducedEffects.matches || isCrit)) {
+    addSpellEffect('impact', enemy.x, enemy.y, blocked ? '#aaccdf' : isCrit ? '#ffcf7c' : opts.color || '#ffc39a',
+      isCrit ? 27 : 15, isCrit ? .28 : .15);
+  }
   if (enemy.hp <= 0) killEnemy(enemy);
 }
 
@@ -2850,6 +3138,8 @@ function pickUberUnique(uberId, P) {
 }
 
 function killEnemy(enemy) {
+  if (enemy.dead) return;
+  if (enemy.breachMob && State.map.breach?.state === 'active') State.map.breach.kills++;
   enemy.dead = true; enemy.deathFade = 0.35;
   AudioSys.hit();
   addBurst(enemy.x, enemy.y, enemy.col, enemy.boss ? 42 : 16, 210, 0.5, 4);
@@ -2887,7 +3177,7 @@ function killEnemy(enemy) {
       if (!P.ubersDefeated) P.ubersDefeated = new Set();
       P.ubersDefeated.add(enemy.uberId);
       const pinUniqueId = pickUberUnique(enemy.uberId, P);
-      const pinItem = generateItem(State.depth, 3, null, pinUniqueId);
+      const pinItem = ensureItemSockets(generateItem(State.depth, 3, null, pinUniqueId));
       State.lootDrops.push({ kind: 'item', x: enemy.x - 18, y: enemy.y, item: pinItem, t: 0 });
       State.lootDrops.push({ kind: 'orb', x: enemy.x + 18, y: enemy.y - 10, orbId: 'exalted', t: 0 });
       State.lootDrops.push({ kind: 'orb', x: enemy.x + 22, y: enemy.y + 14, orbId: 'vaal', t: 0 });
@@ -3029,6 +3319,7 @@ function damagePlayer(rawDmg, dmgType = 'phys') {
 
   if (remaining > 0) {
     P.hp -= remaining;
+    State.hurtGlow = reducedEffects.matches ? .13 : .32;
     AudioSys.hurt();
     State.shake = Math.max(State.shake, 5);
     addFloat(P.x, P.y - 22, `-${remaining}`, '#ff5c5c', 16);
@@ -3107,7 +3398,7 @@ function findNearestVisibleDrop(maxDist = 145) {
 }
 
 addEventListener('keydown', e => {
-  if (!State.started) return;
+  if (!State.started || performance.now() < arrivalHoldUntil) return;
   const k = e.key.toLowerCase();
   if (k === 'g' && !e.repeat) { toggleModal('gems'); return; }
   if (k === 'i' && !e.repeat) { toggleModal('inv'); return; }
@@ -3147,7 +3438,7 @@ function useExitPortal() {
 
 canvas.addEventListener('pointermove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
 canvas.addEventListener('pointerdown', e => {
-  if (!State.started || State.openModal || State.player?.dead) return;
+  if (!State.started || State.openModal || State.player?.dead || performance.now() < arrivalHoldUntil) return;
   mouse.x = e.clientX; mouse.y = e.clientY;
   if (e.button === 0) {
     const wm = worldMouse();
@@ -3170,8 +3461,12 @@ canvas.addEventListener('pointerdown', e => {
       activateRitual(); return;
     }
     mouse.lmb = true;
+    castSkillSlot(0);
   }
-  if (e.button === 2) mouse.rmb = true;
+  if (e.button === 2) {
+    mouse.rmb = true;
+    castSkillSlot(1);
+  }
 });
 addEventListener('pointerup', e => { if (e.button === 0) mouse.lmb = false; if (e.button === 2) mouse.rmb = false; });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
@@ -3221,10 +3516,11 @@ function interactNearby() {
   if (State.map.ritual?.state === 'idle' && dist(P, State.map.ritual) < 68) { activateRitual(); return; }
 }
 
+const BREACH_TARGET = 4;
 function activateBreach() {
   const br = State.map.breach;
   if (!br || br.state !== 'idle') return;
-  br.state = 'active'; br.t = 0; br.waveTick = 0.2;
+  br.state = 'active'; br.kills = 0; br.t = 0; br.waveTick = 0.2;
   AudioSys.boss();
   addRing(br.x, br.y, 180, '#c87aff', 0.45);
   showBanner('Abyssal Breach Opened!');
@@ -3260,6 +3556,105 @@ function activateRitual() {
   showBanner('🩸 Blood Ritual Begun — Wave 1/2!');
 }
 
+const lootPreview = document.getElementById('lootPreview');
+const lootReceipt = document.getElementById('lootReceipt');
+let nearbyLoot = null;
+let comparedLootGear = null;
+let lootBagFull = false;
+let lootReceiptTimer;
+
+function showLootReceipt(item) {
+  const tier = RARITY[item.rarity];
+  lootReceipt.style.setProperty('--loot-color', tier.color);
+  lootReceipt.querySelector('small').textContent = 'Acquired · ' + tier.name;
+  lootReceipt.querySelector('strong').textContent = item.name;
+  lootReceipt.hidden = false;
+  lootReceipt.classList.remove('lootReceiptFlash');
+  void lootReceipt.offsetWidth;
+  lootReceipt.classList.add('lootReceiptFlash');
+  clearTimeout(lootReceiptTimer);
+  lootReceiptTimer = setTimeout(() => { lootReceipt.hidden = true; }, item.rarity >= 2 ? 3000 : 1750);
+}
+
+function updateLootPreview(drop, player) {
+  const item = drop?.item;
+  const equipped = item ? player.eq[item.slot] : null;
+  const full = Boolean(item && player.bag.length >= 24);
+  if (drop === nearbyLoot && equipped === comparedLootGear && full === lootBagFull) return;
+  nearbyLoot = drop;
+  comparedLootGear = equipped;
+  lootBagFull = full;
+  lootPreview.hidden = !drop;
+  if (!drop) return;
+
+  const tier = item ? RARITY[item.rarity] : null;
+  const orb = item ? null : ORBS.find(entry => entry.id === drop.orbId);
+  lootPreview.style.setProperty('--loot-color', tier?.color || '#f5cf85');
+  lootPreview.querySelector('.lootName').textContent = item?.name || orb.name;
+  lootPreview.querySelector('.lootMeta').textContent = item
+    ? [tier.name, SLOTS.find(slot => slot.id === item.slot)?.name].filter(Boolean).join(' · ')
+    : 'Crafting currency';
+  lootPreview.querySelector('.lootLevel').textContent = item
+    ? ['Item Level ' + item.ilvl, item.setId && ITEM_SETS[item.setId]?.name, item.corrupted && 'Corrupted'].filter(Boolean).join(' · ')
+    : '';
+  const mainStat = item?.baseStats?.minD ? 'minD' : item?.baseStats?.armor ? 'armor' : null;
+  const baseStat = lootPreview.querySelector('.lootBase');
+  baseStat.hidden = !mainStat;
+  if (mainStat) {
+    const isWeapon = mainStat === 'minD';
+    const formatValue = stats => isWeapon ? stats.minD + '–' + stats.maxD : String(stats.armor);
+    baseStat.querySelector('.lootBaseLabel').textContent = isWeapon ? 'Base damage' : 'Base armor on item';
+    baseStat.querySelector('.lootBaseValue').textContent = formatValue(item.baseStats);
+    baseStat.querySelector('.lootCompare').textContent = equipped?.baseStats?.[mainStat] !== undefined
+      ? 'Equipped base · ' + formatValue(equipped.baseStats)
+      : '';
+  }
+  const baseLines = item ? formatBaseStatLines(item, mainStat) : [];
+  const affixLines = item ? [...baseLines, ...formatAffixLines(item, false)] : [orb.desc];
+  const affixes = lootPreview.querySelector('.lootAffixes');
+  affixes.hidden = !affixLines.length;
+  affixes.replaceChildren(...affixLines.map(line => {
+    const row = document.createElement('li');
+    row.textContent = line;
+    return row;
+  }));
+
+  const power = lootPreview.querySelector('.lootPower');
+  power.hidden = !item?.power;
+  power.querySelector('strong').textContent = item?.setId ? 'Set item power' : 'Unique power';
+  power.querySelector('p').textContent = item?.power || '';
+
+  const sockets = lootPreview.querySelector('.lootSockets');
+  const socketCount = item?.socketData?.sockets.length || 0;
+  sockets.hidden = !socketCount;
+  if (socketCount) {
+    const groups = computeItemSocketGroups(item);
+    const longestLink = Math.max(...groups.map(group => group.length));
+    const colors = {red:'#ff777c', blue:'#80b9f7', green:'#78dc9d', white:'#f3e4cb'};
+    sockets.querySelector('span').textContent = socketCount + ' sockets' + (longestLink > 1 ? ' · ' + longestLink + ' linked' : '');
+    sockets.querySelector('.lootSocketGroups').replaceChildren(...groups.map(group => {
+      const segment = document.createElement('span');
+      segment.className = 'lootSocketGroup';
+      for (const index of group) {
+        const socket = document.createElement('i');
+        socket.style.setProperty('--socket-color', colors[item.socketData.sockets[index].color] || colors.white);
+        segment.append(socket);
+      }
+      return segment;
+    }));
+  }
+
+  lootPreview.querySelector('.lootBody').scrollTop = 0;
+  lootTake.querySelector('span').textContent = full ? 'Bag full' : 'Pick up';
+  lootTake.disabled = full;
+}
+
+const lootTake = document.getElementById('lootTake');
+lootTake.onclick = () => {
+  const drop = findNearestVisibleDrop();
+  if (!State.openModal && !State.player?.dead && drop && drop === nearbyLoot) pickupDrop(drop);
+};
+
 function pickupDrop(drop) {
   const idx = State.lootDrops.indexOf(drop);
   if (idx < 0) return;
@@ -3277,7 +3672,7 @@ function pickupDrop(drop) {
       return;
     }
     P.bag.push(drop.item);
-    addFloat(drop.x, drop.y - 16, drop.item.name, RARITY[drop.item.rarity].color, 13);
+    showLootReceipt(drop.item);
     AudioSys.loot(drop.item.rarity >= 2);
     State.lootDrops.splice(idx, 1);
   }
@@ -3370,6 +3765,13 @@ function castSkillSlot(slotIdx) {
   const wm = worldMouse();
   P.face = Math.atan2(wm.y - P.y, wm.x - P.x);
   P.animSwing = 1; P.swingDir *= -1;
+  const [style, tint] = EclipseArt.castStyle(def.id, P.cls.accent);
+  const radius = style === 'cast' ? 40 : Math.min(st.radius || 36, 172);
+  const placedAtCursor = def.id === 'rain_thorns';
+  if (def.id !== 'ancestral_leap' && def.id !== 'snare_trap') {
+    addSpellEffect(style, placedAtCursor ? wm.x : P.x, placedAtCursor ? wm.y : P.y, tint, radius,
+      style === 'cast' ? .16 : .38, P.face);
+  }
   const dmgOpts = { ignite: st.ignite, leech: st.leech };
 
   switch (def.id) {
@@ -3418,6 +3820,7 @@ function castSkillSlot(slotIdx) {
       P.invuln = Math.max(P.invuln, 0.3);
       AudioSys.slam(); State.shake = Math.max(State.shake, 7);
       addRing(P.x, P.y, st.radius, '#ffb35c', 0.32);
+      addSpellEffect('fracture', P.x, P.y, '#ffb676', st.radius, .38);
       addBurst(P.x, P.y, '#ffd28a', 22, 220, 0.38, 3);
       let hitAny = false;
       for (const e of State.enemies) {
@@ -3471,13 +3874,16 @@ function castSkillSlot(slotIdx) {
     case 'split_arrow': {
       AudioSys.bow();
       const n = st.proj;
+      const earlyVolley = State.depth < 10 && !State.map.isAtlas && !State.map.isDelve
+        ? { targets: new Set(), repeatedHitMultiplier: 0.12 + 0.88 * earlyGearProgress(State.depth) }
+        : null;
       for (let k = 0; k < n; k++) {
         const ang = P.face + (k - (n - 1) / 2) * 0.13;
         State.projectiles.push({
           fromPlayer: true, x: P.x + Math.cos(ang) * 14, y: P.y + Math.sin(ang) * 14,
           vx: Math.cos(ang) * 630, vy: Math.sin(ang) * 630, r: 4, dmg: st.dmg,
           life: 0.75, col: '#8df5b2', arrow: true, gainFrenzy: true,
-          chainsLeft: st.chains, hitSet: new Set(), ...dmgOpts
+          chainsLeft: st.chains, hitSet: new Set(), earlyVolley, ...dmgOpts
         });
       }
       break;
@@ -3519,6 +3925,7 @@ function update(dt) {
   if (State.hitstop > 0) { State.hitstop -= dt; return; }
 
   State.time += dt;
+  State.hurtGlow = Math.max(0, State.hurtGlow - dt);
   State.shake *= Math.pow(0.88, dt * 60);
   const S = getEffectiveStats();
 
@@ -3561,7 +3968,9 @@ function update(dt) {
   } else {
     const mx = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0);
     const my = (keys.s || keys.arrowdown ? 1 : 0) - (keys.w || keys.arrowup ? 1 : 0);
-    if (mx || my) {
+    P.artMoving = Boolean(mx || my);
+    if (P.artMoving) {
+      P.artStride = (P.artStride || 0) + dt * 19;
       const len = Math.hypot(mx, my);
       const spd = P.cls.speed * S.moveMult;
       moveSlide(P, (mx / len) * spd * dt, (my / len) * spd * dt);
@@ -3591,26 +4000,29 @@ function update(dt) {
         const sx = br.x + Math.cos(a) * r, sy = br.y + Math.sin(a) * r;
         if (fits(sx, sy, 14)) {
           const mob = spawnEnemy(k === 0 ? 'acolyte' : 'thrall', sx, sy, State.depth, k === 0 && Math.random() < 0.5, false);
-          mob.awake = true; mob.col = '#c87aff';
+          mob.breachMob = true; mob.awake = true; mob.col = '#c87aff';
           State.enemies.push(mob);
         }
       }
     }
-    if (br.t >= br.dur) {
+    if (br.kills >= BREACH_TARGET) {
       br.state = 'done';
       if (!P.stats) P.stats = { kills: 0, elites: 0, breaches: 0, atlasClears: 0, maxWsTier: 0, corruptedKills: 0 };
       P.stats.breaches = (P.stats.breaches || 0) + 1;
       addRing(br.x, br.y, 160, '#ffd87a', 0.45);
       const orbPool = State.depth <= 5 ? ['transmute', 'alteration', 'alchemy'] : State.depth <= 10 ? ['alchemy', 'chaos', 'chaos'] : ['alchemy', 'chaos', 'chaos', 'exalted'];
       State.lootDrops.push({ kind: 'orb', x: br.x, y: br.y, orbId: orbPool[randInt(0, orbPool.length - 1)], t: 0 });
-      State.lootDrops.push({ kind: 'item', x: br.x + 20, y: br.y, item: generateItem(State.depth, 2), t: 0 });
+      State.lootDrops.push({ kind: 'item', x: br.x + 20, y: br.y, item: ensureItemSockets(generateItem(State.depth, 2)), t: 0 });
       if (State.depth >= 6 && Math.random() < 0.4 && (!P.jewelStash || P.jewelStash.length < 18)) {
         if (!P.jewelStash) P.jewelStash = [];
         const j = generateJewel(State.depth, 2);
         P.jewelStash.push(j);
         addFloat(br.x, br.y - 30, `${j.icon} ${j.name}`, j.col, 14);
       }
-      showBanner('Abyssal Breach Cleared!');
+      showBanner('Breach sealed · tribute earned');
+    } else if (br.t >= br.dur) {
+      br.state = 'done';
+      showBanner('Breach collapsed · tribute lost');
     }
   }
 
@@ -3631,7 +4043,7 @@ function update(dt) {
       const sockPool = ['chromatic', 'jeweller', 'fusing'];
       State.lootDrops.push({ kind: 'orb', x: rit.x - 16, y: rit.y, orbId: orbPool[randInt(0, orbPool.length - 1)], t: 0 });
       State.lootDrops.push({ kind: 'orb', x: rit.x + 16, y: rit.y - 12, orbId: sockPool[randInt(0, sockPool.length - 1)], t: 0 });
-      State.lootDrops.push({ kind: 'item', x: rit.x + 18, y: rit.y + 14, item: ensureItemSockets(generateItem(State.depth, 2)), t: 0 });
+      State.lootDrops.push({ kind: 'item', x: rit.x + 18, y: rit.y + 14, item: ensureItemSockets(generateItem(State.depth, State.depth < 3 ? 1 : 2)), t: 0 });
       if (State.depth >= 5 && Math.random() < 0.45 && (!P.jewelStash || P.jewelStash.length < 18)) {
         if (!P.jewelStash) P.jewelStash = [];
         const j = generateJewel(State.depth, 2);
@@ -3782,6 +4194,7 @@ function update(dt) {
         AudioSys.boss();
         State.shake = Math.max(State.shake, 10);
         addRing(e.x, e.y, 170, e.col, 0.48);
+        addSpellEffect('fracture', e.x, e.y, e.col, 170, .48);
         showBanner(`${e.name} — Phase II Unleashed!`);
       } else if (e.uber && e.phase === 2 && e.hp <= e.maxHp * 0.33) {
         e.phase = 3;
@@ -3790,6 +4203,7 @@ function update(dt) {
         AudioSys.boss();
         State.shake = Math.max(State.shake, 14);
         addRing(e.x, e.y, 220, '#f5a3ff', 0.55);
+        addSpellEffect('fracture', e.x, e.y, '#f5a3ff', 200, .55);
         showBanner(`${e.name} — Phase III CATACLYSM!`);
       }
       e.specialCd -= dt;
@@ -3927,8 +4341,11 @@ function update(dt) {
 
         if (p.aoe) explodeProj(p);
         else {
-          dealDamage(e, p.dmg, { color: p.col, ignite: p.ignite, leech: p.leech });
-          if (p.gainFrenzy) { P.res = Math.min(3, P.res + 1); P.resTimer = 5.0; }
+          const repeatedHit = p.earlyVolley?.targets.has(e);
+          p.earlyVolley?.targets.add(e);
+          const damage = repeatedHit ? p.dmg * p.earlyVolley.repeatedHitMultiplier : p.dmg;
+          dealDamage(e, damage, { color: p.col, ignite: p.ignite, leech: p.leech });
+          if (p.gainFrenzy && !repeatedHit) { P.res = Math.min(3, P.res + 1); P.resTimer = 5.0; }
         }
 
         if (p.chainsLeft > 0) {
@@ -3967,7 +4384,10 @@ function update(dt) {
       if (h.t < 0) return true;
       if (h.t >= h.dur) {
         addRing(h.x, h.y, h.r, h.col, 0.28); addBurst(h.x, h.y, h.col, 16, 190, 0.34, 3);
-        if (h.kind === 'trap') AudioSys.slam(); else AudioSys.hit();
+        if (h.kind === 'trap') {
+          addSpellEffect('ward', h.x, h.y, h.col, h.r, .33);
+          AudioSys.slam();
+        } else AudioSys.hit();
         for (const e of State.enemies) {
           if (!e.dead && dist(h, e) <= h.r + e.r) {
             dealDamage(e, h.dmg, { color: h.col, ignite: h.ignite, leech: h.leech });
@@ -3996,6 +4416,7 @@ function update(dt) {
 
   State.particles = State.particles.filter(pt => { pt.t += dt; pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.vx *= 0.92; pt.vy *= 0.92; return pt.t < pt.life; });
   State.rings = State.rings.filter(r => (r.t += dt) < r.dur);
+  State.spellEffects = State.spellEffects.filter(effect => (effect.t += dt) < effect.duration);
   State.floats = State.floats.filter(f => { f.t += dt; f.x += f.vx * dt; f.y -= 42 * dt; return f.t < f.life; });
 }
 
@@ -4018,7 +4439,10 @@ function render() {
   if (!State.map || !State.player) return;
 
   const P = State.player, act = getActInfo(State.depth);
-  const shakeX = (Math.random() - 0.5) * State.shake, shakeY = (Math.random() - 0.5) * State.shake;
+  const reduced = reducedEffects.matches;
+  const artTime = State.time;
+  const motion = reduced ? 0 : State.shake * .46;
+  const shakeX = Math.sin(artTime * 167) * motion, shakeY = Math.cos(artTime * 193) * motion;
   const camX = Math.round(W / 2 - P.x + shakeX), camY = Math.round(H / 2 - P.y + shakeY);
 
   ctx.save(); ctx.translate(camX, camY);
@@ -4026,41 +4450,35 @@ function render() {
   const x0 = Math.max(0, Math.floor((P.x - W / 2) / TILE) - 1), x1 = Math.min(GRID - 1, Math.ceil((P.x + W / 2) / TILE) + 1);
   const y0 = Math.max(0, Math.floor((P.y - H / 2) / TILE) - 1), y1 = Math.min(GRID - 1, Math.ceil((P.y + H / 2) / TILE) + 1);
 
-  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
-    const t = State.map.tiles[y * GRID + x], px = x * TILE, py = y * TILE;
-    if (t === 1) {
-      const checker = ((x * 7 + y * 13) & 3);
-      ctx.fillStyle = State.map.isTown ? (checker === 0 ? '#292434' : checker === 1 ? '#2e2938' : '#231e2c') : (checker === 0 ? act.tint : checker === 1 ? '#29222d' : '#1f1a22');
-      ctx.fillRect(px, py, TILE, TILE);
-      ctx.strokeStyle = '#141016'; ctx.lineWidth = 1; ctx.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
-    } else if (State.map.tiles[y * GRID + x - 1] || State.map.tiles[y * GRID + x + 1] || State.map.tiles[(y - 1) * GRID + x] || State.map.tiles[(y + 1) * GRID + x]) {
-      ctx.fillStyle = '#382e3b'; ctx.fillRect(px, py - 10, TILE, TILE);
-      ctx.fillStyle = '#221b26'; ctx.fillRect(px, py + TILE - 10, TILE, 10);
-      ctx.fillStyle = '#6b566544'; ctx.fillRect(px + 2, py - 8, TILE - 4, 2);
+  const biome = State.map.isTown ? 0 : act.act;
+  const torchColors = ['#ffc183', '#ffad71', '#ff9562', '#89e3ec', '#cd99fa'];
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      const index = y * GRID + x;
+      const tiles = State.map.tiles;
+      const floor = tiles[index] === 1;
+      const wall = !floor && ((x > 0 && tiles[index - 1]) || (x + 1 < GRID && tiles[index + 1]) || tiles[index - GRID] || tiles[index + GRID]);
+      if (floor || wall) EclipseArt.stone(ctx, x * TILE, y * TILE - (wall ? 10 : 0), TILE, biome, wall, (x * 7 + y * 13) & 7);
     }
   }
 
-  for (const t of State.map.torches) {
-    if (Math.abs(t.x - P.x) > W / 2 + 120 || Math.abs(t.y - P.y) > H / 2 + 120) continue;
-    const flick = 1 + Math.sin(State.time * 10 + t.x) * 0.08;
-    const grad = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, 130 * flick);
-    grad.addColorStop(0, 'rgba(255,145,65,0.22)'); grad.addColorStop(1, 'rgba(255,100,30,0)');
-    ctx.fillStyle = grad; ctx.fillRect(t.x - 130, t.y - 130, 260, 260);
-    ctx.fillStyle = '#4a352b'; ctx.fillRect(t.x - 3, t.y - 8, 6, 12);
-    ctx.fillStyle = '#ffaa4a'; ctx.beginPath(); ctx.arc(t.x, t.y - 11, 4.5 * flick, 0, Math.PI * 2); ctx.fill();
+  for (const [index, room] of State.map.rooms.entries()) {
+    if (room.x > x1 || room.y > y1 || room.x + room.w < x0 || room.y + room.h < y0) continue;
+    EclipseArt.roomDecor(ctx, room, TILE, biome, index === 0 || (State.map.bossFloor && index === State.map.rooms.length - 1));
+  }
+
+  for (const torch of State.map.torches) {
+    if (Math.abs(torch.x - P.x) > W / 2 + 160 || Math.abs(torch.y - P.y) > H / 2 + 160) continue;
+    EclipseArt.torch(ctx, torch.x, torch.y, artTime, torchColors[biome], reduced);
   }
 
   // Town Sanctuary Stations
   if (State.map.isTown && State.map.stations) {
     for (const st of State.map.stations) {
       const lockMsg = getTownStationLock(st.id, P);
-      const pulse = lockMsg ? 1 : 1 + Math.sin(State.time * 3 + st.x) * 0.08;
       ctx.save(); ctx.translate(st.x, st.y);
-      ctx.globalAlpha = lockMsg ? 0.52 : 1;
-      ctx.fillStyle = (lockMsg ? '#594b5e' : st.col) + '22'; ctx.beginPath(); ctx.arc(0, 0, 26 * pulse, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = lockMsg ? '#7b6c82' : st.col; ctx.lineWidth = 2; ctx.stroke();
-      ctx.font = '20px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(lockMsg ? '🔒' : st.icon, 0, 1);
+      EclipseArt.station(ctx, st.id, st.col, Boolean(lockMsg), State.time);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.font = '700 11px system-ui'; ctx.fillStyle = lockMsg ? '#a899ad' : st.col;
       ctx.fillText(st.name.toUpperCase(), 0, -34);
       if (lockMsg) {
@@ -4078,12 +4496,17 @@ function render() {
     if (br.state === 'active') {
       ctx.fillStyle = 'rgba(155,70,255,0.12)'; ctx.beginPath(); ctx.arc(0, 0, br.r, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = '#d18cff'; ctx.lineWidth = 2.5; ctx.stroke();
+      EclipseArt.light(ctx, 0, 0, 75, '#a557ef62');
+      EclipseArt.insignia(ctx, br.r + 7, '#d89aff9c', -State.time * 0.4);
     } else {
       const pulse = 1 + Math.sin(State.time * 4) * 0.14;
       ctx.strokeStyle = '#c87aff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 18 * pulse, 0, Math.PI * 2); ctx.stroke();
       ctx.fillStyle = '#b15cff'; ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(10, 0); ctx.lineTo(0, 14); ctx.lineTo(-10, 0); ctx.closePath(); ctx.fill();
       ctx.font = '700 10px system-ui'; ctx.textAlign = 'center'; ctx.fillStyle = '#e5b8ff';
-      ctx.fillText('ABYSSAL BREACH [E]', 0, -24);
+      EclipseArt.light(ctx, 0, 0, 40, '#ac64ff55');
+      EclipseArt.insignia(ctx, 24, '#bd80ef', State.time);
+      ctx.fillStyle = '#e5b8ff';
+      ctx.fillText('ABYSSAL BREACH [E]', 0, -33);
     }
     ctx.restore();
   }
@@ -4117,10 +4540,7 @@ function render() {
   const unlocked = portalUnlocked(), pt = State.map.portal;
   if (!State.map.isTown) {
     ctx.save(); ctx.translate(pt.x, pt.y);
-    ctx.fillStyle = '#09070d'; ctx.beginPath(); ctx.ellipse(0, 0, 28, 16, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = unlocked ? '#f2be6b' : '#8c3b46'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(0, -14, 21, Math.PI, 0); ctx.stroke();
-    if (unlocked) { ctx.globalAlpha = 0.45 + Math.sin(State.time * 4) * 0.2; ctx.fillStyle = '#f2be6b'; ctx.beginPath(); ctx.arc(0, -10, 15, 0, Math.PI * 2); ctx.fill(); }
+    EclipseArt.portal(ctx, unlocked, State.time);
     ctx.globalAlpha = 1; ctx.font = '700 11px system-ui'; ctx.textAlign = 'center';
     ctx.fillStyle = unlocked ? '#ffe0a3' : '#e08989';
     const portalLabel = State.map.isDelve
@@ -4134,27 +4554,52 @@ function render() {
     ctx.restore();
   }
 
-  // Ground Loot Drops + Loot Beams
-  for (const d of State.lootDrops) {
-    if (!isDropVisible(d)) continue;
-    if (Math.abs(d.x - P.x) > W / 2 + 80 || Math.abs(d.y - P.y) > H / 2 + 80) continue;
-
-    const col = d.kind === 'orb' ? '#ffd87a' : RARITY[d.item.rarity].color;
-    const beamH = d.kind === 'orb' ? 42 : RARITY[d.item.rarity].beam;
-
-    if (beamH > 0) {
-      const grad = ctx.createLinearGradient(d.x, d.y - beamH, d.x, d.y);
-      grad.addColorStop(0, col + '00'); grad.addColorStop(1, col + 'bb');
-      ctx.fillStyle = grad; ctx.fillRect(d.x - 2.5, d.y - beamH, 5, beamH);
+  // Draw rarity beams below the item names.
+  const groundLoot = State.lootDrops.filter(drop => isDropVisible(drop)
+    && Math.abs(drop.x - P.x) < W / 2 + 80 && Math.abs(drop.y - P.y) < H / 2 + 80);
+  const mainLoot = !State.openModal && !P.dead ? findNearestVisibleDrop() : null;
+  for (const drop of groundLoot) {
+    const tier = drop.item ? RARITY[drop.item.rarity] : null;
+    const color = tier?.color || '#f5cf85';
+    const beamHeight = tier?.beam ?? 32;
+    if (beamHeight) {
+      const beam = ctx.createLinearGradient(drop.x, drop.y - beamHeight, drop.x, drop.y);
+      beam.addColorStop(0, color + '00');
+      beam.addColorStop(1, color + '9c');
+      ctx.fillStyle = beam;
+      const width = drop.item?.rarity === 3 ? 12 : 5;
+      ctx.fillRect(drop.x - width / 2, drop.y - beamHeight, width, beamHeight);
     }
+  }
 
-    ctx.fillStyle = '#0e0b14eb';
-    const label = d.kind === 'orb' ? ORBS.find(o => o.id === d.orbId).icon + ' ' + ORBS.find(o => o.id === d.orbId).name : d.item.icon + ' ' + d.item.name;
-    ctx.font = '700 11px system-ui'; ctx.textAlign = 'center';
-    const tw = ctx.measureText(label).width + 14;
-    ctx.fillRect(d.x - tw / 2, d.y - 22, tw, 18);
-    ctx.strokeStyle = col + '99'; ctx.lineWidth = 1; ctx.strokeRect(d.x - tw / 2, d.y - 22, tw, 18);
-    ctx.fillStyle = col; ctx.fillText(label, d.x, d.y - 9);
+  const lootLabels = [];
+  const orderedLoot = groundLoot.sort((left, right) => Number(right === mainLoot) - Number(left === mainLoot)
+    || (right.item?.rarity ?? 0) - (left.item?.rarity ?? 0));
+  for (const drop of orderedLoot) {
+    const selected = drop === mainLoot;
+    const tier = drop.item ? RARITY[drop.item.rarity] : null;
+    const name = drop.item?.name || ORBS.find(entry => entry.id === drop.orbId).name;
+    const color = tier?.color || '#f5cf85';
+    ctx.font = selected ? '700 12px system-ui' : '600 11px system-ui';
+    const width = ctx.measureText(name).width + 20;
+    const left = drop.x - width / 2;
+    const height = 19;
+    const firstRow = drop.y - 36;
+    const candidateRows = tier?.id >= 2 ? [firstRow, firstRow - 22, firstRow - 44] : [firstRow];
+    const top = candidateRows.find(row => !lootLabels.some(label =>
+      left < label.right && left + width > label.left && row < label.bottom && row + height > label.top));
+    if (top === undefined) continue;
+    lootLabels.push({left, right: left + width, top, bottom: top + height});
+    if (top !== firstRow) {
+      ctx.strokeStyle = color + '65'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(drop.x, drop.y - 13); ctx.lineTo(drop.x, top + height); ctx.stroke();
+    }
+    ctx.fillStyle = '#100d17f3'; ctx.fillRect(left, top, width, height);
+    ctx.fillStyle = color; ctx.fillRect(left, top, selected ? 3 : 2, height);
+    ctx.strokeStyle = color + (selected ? 'c0' : '55'); ctx.lineWidth = 1;
+    ctx.strokeRect(left + .5, top + .5, width - 1, height - 1);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(name, drop.x, top + height / 2);
   }
 
   // Biome Room Traps (Milestone 6)
@@ -4204,9 +4649,7 @@ function render() {
       const w = e.windup, pct = 1 - w.t / w.dur;
       ctx.save();
       if (w.kind === 'slam') {
-        ctx.fillStyle = 'rgba(235,80,45,0.18)'; ctx.beginPath(); ctx.arc(w.x, w.y, w.r, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#ff9854'; ctx.lineWidth = 2; ctx.stroke();
-        ctx.beginPath(); ctx.arc(w.x, w.y, w.r * pct, 0, Math.PI * 2); ctx.stroke();
+        EclipseArt.dangerZone(ctx, w.x, w.y, w.r, clamp(pct, 0, 1));
       } else if (w.kind === 'melee') {
         ctx.translate(e.x, e.y); ctx.rotate(w.ang);
         ctx.fillStyle = 'rgba(235,90,60,0.22)'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, e.r + P.r + 18, -1.1, 1.1); ctx.closePath(); ctx.fill();
@@ -4230,20 +4673,7 @@ function render() {
     if (e.shockT > 0) { ctx.strokeStyle = '#7ad7ff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, e.r + 6, 0, Math.PI * 2); ctx.stroke(); }
 
     ctx.rotate(e.face);
-    ctx.fillStyle = e.flash > 0 ? '#ffffff' : e.chill > 0 ? '#7ad7ff' : e.col;
-    ctx.beginPath(); ctx.arc(0, 0, e.r, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#151018'; ctx.lineWidth = 2; ctx.stroke();
-    if (e.shield && e.shieldT > 0 && !e.dead) {
-      ctx.strokeStyle = '#d4e2f2'; ctx.lineWidth = 4;
-      ctx.beginPath(); ctx.arc(0, 0, e.r + 5, -1.05, 1.05); ctx.stroke();
-    } else if (e.summoner && !e.dead) {
-      ctx.fillStyle = '#8ef593'; ctx.beginPath(); ctx.arc(e.r + 4, 5, 4, 0, Math.PI * 2); ctx.fill();
-    } else if (e.frost && !e.dead) {
-      ctx.strokeStyle = '#9ceeff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, e.r + 3, 0, Math.PI * 2); ctx.stroke();
-    }
-    ctx.fillStyle = e.boss ? '#ffea80' : '#ff4d4d';
-    ctx.beginPath(); ctx.arc(e.r * 0.45, -e.r * 0.32, e.r * 0.16, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(e.r * 0.45, e.r * 0.32, e.r * 0.16, 0, Math.PI * 2); ctx.fill();
+    EclipseArt.monster(ctx, e, artTime, reduced);
     ctx.restore();
 
     if (!e.dead && e.hp < e.maxHp && !e.boss) {
@@ -4257,7 +4687,11 @@ function render() {
     }
   }
 
-  drawHero(P);
+  for (const effect of State.spellEffects) {
+    if (Math.abs(effect.x - P.x) > W / 2 + 200 || Math.abs(effect.y - P.y) > H / 2 + 200) continue;
+    EclipseArt.spell(ctx, effect, effect.t / effect.duration, reduced);
+  }
+  EclipseArt.hero(ctx, P, artTime, reduced);
 
   // Directional Golden Compass Chevron to Unlocked Off-Screen Exit Portal
   if (!State.map.isTown && unlocked && (Math.abs(pt.x - P.x) > W * 0.42 || Math.abs(pt.y - P.y) > H * 0.42)) {
@@ -4275,15 +4709,28 @@ function render() {
     ctx.restore();
   }
 
-  for (const p of State.projectiles) {
-    ctx.save(); ctx.translate(p.x, p.y); ctx.fillStyle = p.col;
-    if (p.arrow) { ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillRect(-9, -1.5, 18, 3); ctx.fillStyle = '#fff'; ctx.fillRect(5, -2, 5, 4); }
-    else { ctx.shadowColor = p.col; ctx.shadowBlur = 12; ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, p.r * 0.45, 0, Math.PI * 2); ctx.fill(); }
-    ctx.restore();
+  for (const projectile of State.projectiles) {
+    if (Math.abs(projectile.x - P.x) < W / 2 + 100 && Math.abs(projectile.y - P.y) < H / 2 + 100) EclipseArt.projectile(ctx, projectile);
   }
 
-  for (const r of State.rings) { const p = r.t / r.dur; ctx.save(); ctx.globalAlpha = 1 - p; ctx.strokeStyle = r.color; ctx.lineWidth = 4 * (1 - p) + 1; ctx.beginPath(); ctx.arc(r.x, r.y, r.maxR * p, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
-  for (const pt2 of State.particles) { const k = 1 - pt2.t / pt2.life; ctx.globalAlpha = k; ctx.fillStyle = pt2.color; ctx.beginPath(); ctx.arc(pt2.x, pt2.y, pt2.size * k, 0, Math.PI * 2); ctx.fill(); }
+  for (const ring of State.rings) {
+    const phase = ring.t / ring.dur;
+    if (phase >= 1) continue;
+    ctx.save(); ctx.translate(ring.x, ring.y);
+    ctx.globalAlpha = 1 - phase;
+    ctx.shadowColor = ring.color; ctx.shadowBlur = 13;
+    EclipseArt.insignia(ctx, Math.max(1, ring.maxR * phase), ring.color, State.time * 1.8);
+    ctx.restore();
+  }
+  for (const spark of State.particles) {
+    const life = 1 - spark.t / spark.life;
+    if (life <= 0) continue;
+    ctx.globalAlpha = life;
+    ctx.strokeStyle = spark.color; ctx.lineWidth = Math.max(1, spark.size * life * .55);
+    ctx.beginPath(); ctx.moveTo(spark.x, spark.y);
+    ctx.lineTo(spark.x - spark.vx * .035, spark.y - spark.vy * .035);
+    ctx.stroke();
+  }
   ctx.globalAlpha = 1;
 
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -4299,31 +4746,14 @@ function render() {
   vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, (State.corruption > 0 && !State.map.isTown) ? `rgba(${28 + State.corruption * 16},4,24,0.84)` : 'rgba(4,3,6,0.82)');
   ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = 'rgba(255,180,120,0.22)';
-  for (const a of State.ashes) ctx.fillRect(((a.x * W + State.time * a.v) % W), ((a.y * H - State.time * a.v * 0.6 + H * 10) % H), a.s, a.s);
-}
-
-function drawHero(P) {
-  ctx.save(); ctx.translate(P.x, P.y);
-  if (P.activeAuras.size > 0) { ctx.strokeStyle = 'rgba(205,140,255,0.38)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 22 + Math.sin(State.time * 4) * 2, 0, Math.PI * 2); ctx.stroke(); }
-  if (P.es > 0) { ctx.strokeStyle = 'rgba(90,209,255,0.72)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, 0, P.r + 7, 0, Math.PI * 2); ctx.stroke(); }
-  ctx.fillStyle = '#0009'; ctx.beginPath(); ctx.ellipse(0, 10, 16, 7, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.rotate(P.face);
-  const swingAngle = P.animSwing > 0 ? Math.sin((1 - P.animSwing) * Math.PI) * 1.45 * P.swingDir : 0;
-
-  ctx.fillStyle = P.cls.color; ctx.beginPath(); ctx.ellipse(-2, 0, 12, 15, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#18121c'; ctx.lineWidth = 2; ctx.stroke();
-
-  ctx.save(); ctx.translate(8, 9); ctx.rotate(swingAngle);
-  if (P.cls.id === 'dreadnought') { ctx.fillStyle = '#73533d'; ctx.fillRect(-4, -2, 26, 4); ctx.fillStyle = '#cdd6de'; ctx.fillRect(18, -9, 9, 18); }
-  else if (P.cls.id === 'harbinger') { ctx.fillStyle = '#4f3a61'; ctx.fillRect(-4, -1.5, 28, 3); ctx.fillStyle = '#6ce2ff'; ctx.beginPath(); ctx.arc(24, 0, 5, 0, Math.PI * 2); ctx.fill(); }
-  else { ctx.strokeStyle = '#c2a46d'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(4, -8, 15, -1.1, 1.1); ctx.stroke(); }
-  ctx.restore();
-
-  ctx.fillStyle = P.cls.id === 'dreadnought' ? '#a6b1bd' : '#2a2233';
-  ctx.beginPath(); ctx.arc(2, 0, 8.5, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#e6bd78'; ctx.lineWidth = 1.4; ctx.stroke();
-  ctx.restore();
+  EclipseArt.atmosphere(ctx, W, H, P.x, P.y, artTime, biome, State.ashes, reduced);
+  const danger = Math.max(State.hurtGlow * .64, P.hp / Math.max(1, P.artMaxHp || P.maxHp) < .25 ? .1 : 0);
+  if (danger > 0) {
+    const hurt = ctx.createRadialGradient(W / 2, H / 2, Math.min(W,H) * .15, W / 2, H / 2, Math.max(W,H) * .73);
+    hurt.addColorStop(0, '#9d2b4c00');
+    hurt.addColorStop(1, 'rgba(224,58,74,' + danger + ')');
+    ctx.fillStyle = hurt; ctx.fillRect(0, 0, W, H);
+  }
 }
 
 function renderMinimap() {
@@ -4367,7 +4797,11 @@ function updateHud() {
   if (!P) return;
   const S = getEffectiveStats();
 
-  document.getElementById('hpGlobe').style.setProperty('--pct', clamp(P.hp / S.maxHp, 0, 1));
+  P.artMaxHp = S.maxHp;
+  const hpGlobe = document.getElementById('hpGlobe');
+  const life = clamp(P.hp / S.maxHp, 0, 1);
+  hpGlobe.style.setProperty('--pct', life);
+  hpGlobe.classList.toggle('low-health', life < .25);
   document.getElementById('mpGlobe').style.setProperty('--pct', S.bloodMagic ? 0 : clamp(P.mp / S.maxMp, 0, 1));
   document.getElementById('mpReserve').style.height = `${S.bloodMagic ? 100 : Math.round(S.reservePct * 100)}%`;
   document.getElementById('hpText').innerHTML = S.maxEs > 0 ? `${Math.ceil(P.hp)}<br><span style="color:#66e0ff;font-size:10px">${Math.ceil(P.es)} ES</span>` : Math.ceil(P.hp);
@@ -4454,7 +4888,18 @@ function updateHud() {
   for (let i = 0; i < 4; i++) {
     const slotEl = document.getElementById(`slot${i}`), grp = P.links[i];
     const actDef = grp.active ? ACTIVE_GEM_DEFS[grp.active.defId] : null;
-    slotEl.querySelector('span').textContent = actDef ? actDef.icon : '·';
+    if (slotEl.dataset.skill !== (actDef?.id || '')) {
+      slotEl.dataset.skill = actDef?.id || '';
+      slotEl.querySelector('span').textContent = actDef ? actDef.icon : '·';
+      slotEl.classList.toggle('has-rune', Boolean(actDef));
+      if (actDef) {
+        slotEl.style.setProperty('--skill-tone', EclipseArt.castStyle(actDef.id, P.cls.accent)[1]);
+        slotEl.style.setProperty('--skill-art', 'url("' + EclipseArt.rune(actDef.id, P.cls.accent) + '")');
+      }
+    }
+    const timeLeft = P.cds[i];
+    if (timeLeft > .45) slotEl.dataset.timer = timeLeft.toFixed(1);
+    else if (slotEl.hasAttribute('data-timer')) slotEl.removeAttribute('data-timer');
     slotEl.classList.toggle('emptySlot', !actDef);
     slotEl.classList.toggle('activeAura', Boolean(actDef?.aura && P.activeAuras.has(actDef.id)));
     const st = actDef ? computeSkillStats(i) : null;
@@ -4519,22 +4964,31 @@ function updateHud() {
   const nearPortal = !State.map.isTown && unlocked && dist(P, State.map.portal) < 68 && !P.dead;
   const nearBreach = !State.map.isTown && State.map.breach?.state === 'idle' && dist(P, State.map.breach) < 68 && !P.dead;
   const nearRitual = !State.map.isTown && State.map.ritual?.state === 'idle' && dist(P, State.map.ritual) < 68 && !P.dead;
-  const nearDrop = !P.dead && !nearStation && !nearPortal && !nearBreach && !nearRitual ? findNearestVisibleDrop(95) : null;
-  ap.style.display = (nearStation || nearPortal || nearBreach || nearRitual || nearDrop) ? 'block' : 'none';
-  ap.querySelector('kbd').textContent = nearDrop ? 'F' : 'E';
+  updateLootPreview(!P.dead && !State.openModal ? findNearestVisibleDrop() : null, P);
+  ap.style.display = (nearStation || nearPortal || nearBreach || nearRitual) ? 'block' : 'none';
   if (nearStation) {
     const lockMsg = getTownStationLock(nearStation.id, P);
     ap.querySelector('span').textContent = lockMsg ? `${nearStation.name.replace(' [E]', '')} (${lockMsg})` : (nearStation.id === 'waygate' ? `Return to Depth ${State.returnDepth}` : nearStation.name.replace(' [E]', ''));
   } else if (nearPortal) ap.querySelector('span').textContent = State.map.isDelve ? `Descend to Delve ${State.map.delveDepth + 1}` : (State.map.isAtlas || State.map.isPinnacle || State.depth >= 20) ? 'Return to Sanctuary' : `Descend to Depth ${State.depth + 1}`;
-  else if (nearBreach) ap.querySelector('span').textContent = 'Open Abyssal Breach';
+  else if (nearBreach) ap.querySelector('span').textContent = 'Open Breach · slay ' + BREACH_TARGET + ' invaders before collapse';
   else if (nearRitual) ap.querySelector('span').textContent = 'Begin Blood Ritual';
-  else if (nearDrop) {
-    const dName = nearDrop.kind === 'orb' ? ORBS.find(o => o.id === nearDrop.orbId)?.name : nearDrop.item.name;
-    ap.querySelector('span').textContent = `Loot ${dName}`;
-  }
 
+  document.getElementById('objHud').dataset.open = String(unlocked);
+  const encounter = document.getElementById('encounterHud');
+  const eventLabel = document.getElementById('encounterLabel');
+  const breach = State.map.breach, ritual = State.map.ritual;
+  const breachActive = breach?.state === 'active', ritualActive = ritual?.state === 'active';
+  encounter.hidden = !breachActive && !ritualActive;
+  if (breachActive || ritualActive) {
+    encounter.style.setProperty('--event-color', breachActive ? '#d69deb' : '#f98c9c');
+    encounter.style.setProperty('--event-progress', (breachActive ? clamp(1 - breach.t / breach.dur, 0, 1) : ritual.wave / 2) * 100 + '%');
+    eventLabel.textContent = breachActive
+      ? 'Breach · ' + breach.kills + '/' + BREACH_TARGET + ' invaders · ' + Math.max(0, Math.ceil(breach.dur - breach.t)) + 's'
+      : 'Blood Ritual · Wave ' + ritual.wave + '/2';
+  }
   const boss = State.enemies.find(e => e.boss && !e.dead && e.awake);
   const bBar = document.getElementById('bossBar');
+  bBar.dataset.active = String(Boolean(boss));
   if (boss) {
     bBar.style.display = 'block';
     bBar.querySelector('.bname').textContent = boss.name;
@@ -4543,14 +4997,32 @@ function updateHud() {
       : State.map.isDelve ? `Abyssal Overseer · Delve ${State.map.delveDepth}`
       : State.map.isAtlas ? `Atlas T${State.activeWaystone?.tier || 1} · ${boss.phase === 2 ? 'Enraged!' : 'Phase I'}`
       : `Act ${boss.actId} Boss · ${boss.phase === 2 ? 'Phase II — Enraged!' : 'Phase I'}`;
-    document.getElementById('bossFill').style.width = `${clamp((boss.hp / boss.maxHp) * 100, 0, 100)}%`;
+    const remaining = clamp(boss.hp / boss.maxHp, 0, 1) * 100;
+    bBar.dataset.phase = boss.phase;
+    document.getElementById('bossPercent').textContent = Math.ceil(remaining) + '%';
+    document.getElementById('bossFill').style.width = remaining + '%';
   } else bBar.style.display = 'none';
 }
 
 // ============================================================================
 // MODULE 12: GEM UI & INVENTORY/CURRENCY UI
 // ============================================================================
+const systemMenu = document.getElementById('systemMenu');
+const menuToggle = document.getElementById('menuToggle');
+function setSystemMenu(open) {
+  systemMenu.hidden = !open;
+  menuToggle.setAttribute('aria-expanded', String(open));
+}
+for (const button of systemMenu.querySelectorAll('[data-host-panel]')) {
+  button.hidden = window.parent === window;
+  button.onclick = () => window.parent.postMessage({type: button.dataset.hostPanel}, location.origin);
+}
+menuToggle.onclick = () => setSystemMenu(systemMenu.hidden);
+systemMenu.addEventListener('click', e => { if (e.target.closest('button')) setSystemMenu(false); });
+document.addEventListener('pointerdown', e => { if (!systemMenu.hidden && !e.target.closest('#topHud')) setSystemMenu(false); }, true);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !systemMenu.hidden) { setSystemMenu(false); menuToggle.focus(); } });
 function toggleModal(which) {
+  setSystemMenu(false);
   const next = (which === null || State.openModal === which) ? null : which;
   State.openModal = next;
   if (next !== null) clearInputState();
@@ -4565,17 +5037,46 @@ function toggleModal(which) {
   document.getElementById('bestiaryOverlay').style.display = next === 'bestiary' ? 'grid' : 'none';
   document.getElementById('pantheonOverlay').style.display = next === 'pantheon' ? 'grid' : 'none';
   if (next === 'gems') { State.player.unseenGems = 0; State.selectedSocket = null; renderGemMenu(); }
-  if (next === 'inv') { State.selectedOrb = null; renderInventoryMenu(); }
+  if (next === 'inv') { State.selectedOrb = null; document.getElementById('inventoryFeedback').hidden = true; renderInventoryMenu(); }
   if (next === 'passive') { renderPassiveTree(); }
   if (next === 'ascend') { renderAscendancyModal(); }
   if (next === 'stash') { renderStashModal(); }
   if (next === 'atlas') { renderAtlasModal(); }
-  if (next === 'bench') { renderBenchModal(); }
+  if (next === 'bench') { document.getElementById('benchFeedback').hidden = true; renderBenchModal(); }
   if (next === 'bestiary') { renderBestiaryModal(); }
   if (next === 'pantheon') { renderPantheonModal(); }
 }
 
+function starterLinkTarget(P) {
+  const weapon = P.eq.weapon;
+  if (weapon?.uid !== 'starter' || weapon.socketData.sockets[1]?.gem) return null;
+  const gem = P.gemStash.find(g => g.defId === P.cls.starterSupport);
+  const group = computeItemSocketGroups(weapon).find(indices => indices.includes(0) && indices.includes(1));
+  if (!gem || !group || weapon.socketData.sockets[0]?.gem?.defId !== P.cls.starterActives[0]) return null;
+  const match = findCompatibleGearSocket(P, gem, 'weapon', group);
+  return match ? { gem, match } : null;
+}
+
+document.getElementById('firstLink').onclick = () => {
+  const P = State.player, target = starterLinkTarget(P);
+  if (!target) return;
+  const { gem, match } = target;
+  match.item.socketData.sockets[match.sockIdx].gem = gem;
+  P.gemStash.splice(P.gemStash.indexOf(gem), 1);
+  rebuildPlayerLinksFromGear(P);
+  syncVitalCaps(); saveHero(true); syncGemHost(); AudioSys.craft();
+  renderGemMenu();
+  showBanner('Support linked · try your primary attack');
+};
+
 function renderGemMenu() {
+  const target = starterLinkTarget(State.player);
+  const linkButton = document.getElementById('firstLink');
+  linkButton.hidden = !target;
+  if (target) {
+    const def = SUPPORT_GEM_DEFS[target.gem.defId];
+    linkButton.textContent = 'Link ' + def.name + ' to ' + ACTIVE_GEM_DEFS[State.player.cls.starterActives[0]].name + ' · ' + def.desc;
+  }
   const P = State.player, keysLabel = ['LMB', 'RMB', 'Q', 'R'], cap = supportCapForPlayer(P);
   const colDot = c => c === 'red' ? '🔴' : c === 'blue' ? '🔵' : c === 'green' ? '🟢' : '⚪';
   document.getElementById('equippedLinks').innerHTML = P.links.map((grp, slotIdx) => {
@@ -4603,7 +5104,7 @@ function renderGemMenu() {
       (st.ignite ? ` · <span style="color:#ff9447">Ignite</span>` : '') + (st.leech ? ` · <span style="color:#ff7085">${Math.round(st.leech * 100)}% Leech</span>` : ''))
       : 'Empty Skill Circuit — select a Gem from Stash to auto-socket into compatible Gear';
     const actSockCol = gref ? gearIt?.socketData?.sockets[gref.activeSockIdx]?.color : null;
-    const gearTag = gref && gearIt ? `${gearIt.icon} ${gearIt.name}` : 'Unassigned';
+    const gearTag = gref && gearIt ? gearIt.name : 'Unassigned';
     return `<div class="linkRow"><div class="linkTop"><b>Slot ${slotIdx + 1} [${keysLabel[slotIdx]}] · <span style="color:#bfb2c2;font-weight:600">${gearTag}</span></b><span>${act ? `Gem Lv ${grp.active.lv} (${grp.active.xp}/${gemXpNeed(grp.active.lv)} XP)` : 'Empty'}</span></div>
       <div class="socketsBar" style="flex-wrap:wrap"><button class="socketNode ${selAct ? 'selected' : ''}" data-sock="${slotIdx}:active:0"><span>${act ? act.icon : '⬡'}</span><div><b>${act ? act.name : 'Empty Active'}</b><small style="color:#a698a1">${act ? `${actSockCol ? colDot(actSockCol) + ' ' : ''}${act.tag}` : 'Equip Gem'}</small></div></button>${supHtml}</div>
       <div class="linkStats">${statsLine}</div></div>`;
@@ -4613,8 +5114,8 @@ function renderGemMenu() {
   stashEl.innerHTML = P.gemStash.length ? P.gemStash.map((g, idx) => {
     const def = g.kind === 'active' ? ACTIVE_GEM_DEFS[g.defId] : SUPPORT_GEM_DEFS[g.defId];
     const gCol = GEM_COLOR_BY_ID[g.defId] || 'red';
-    return `<div class="gemItem">
-      <div class="gmain" data-stash="${idx}"><span class="gico">${def.icon}</span><div><b>${colDot(gCol)} ${def.name} (Lv ${g.lv})</b><small>${def.desc}</small></div></div>
+    return `<div class="gemItem" style="border-left:2px solid ${def.color || (gCol === 'blue' ? '#80b9f7' : gCol === 'green' ? '#78dc9d' : '#ff777c')}">
+      <div class="gmain" data-stash="${idx}"><div><b>${def.name} (Lv ${g.lv})</b><small>${def.desc}</small></div></div>
       <span class="gemTag ${g.kind}">${g.kind}</span>
       <button class="hudBtn" data-crush="${idx}" title="Crush gem into XP for equipped gems">Crush (+${45 * g.lv} XP)</button>
     </div>`;
@@ -4744,42 +5245,67 @@ function getSelectedItem() {
   return ref.loc === 'eq' ? State.player.eq[ref.idx] : State.player.bag[ref.idx];
 }
 
+function openRareAffixes(item, affixes, current) {
+  if (current.length >= 3) return [];
+  return affixes.filter(affix => affix.slots.includes(item.slot) && !current.some(rolled => rolled.key === affix.key));
+}
+
+function orbRestriction(orbId, item, player) {
+  if (!item) return 'Select a piece of gear.';
+  if (item.corrupted) return 'Corrupted items cannot be modified.';
+  if (item.rarity === 3 && orbId !== 'vaal') return 'Unique items only accept Vaal Orbs.';
+  const needsRarity = { transmute: 0, alchemy: 0, alteration: 1, chaos: 2, exalted: 2 }[orbId];
+  if (needsRarity !== undefined && item.rarity !== needsRarity) return 'Requires ' + RARITY[needsRarity].name + ' gear.';
+  if (orbId === 'exalted') {
+    const limit = rareGearAffixLimit(item.ilvl || 1);
+    if (item.prefixes.length + item.suffixes.length >= limit) return 'This item has reached its ' + limit + '-affix limit.';
+    if (!openRareAffixes(item, PREFIXES, item.prefixes).length && !openRareAffixes(item, SUFFIXES, item.suffixes).length) {
+      return 'No additional affixes are available for this item.';
+    }
+  }
+  if (['chromatic', 'jeweller', 'fusing'].includes(orbId) && !SOCKETABLE_SLOTS.includes(item.slot)) {
+    return 'Requires a weapon, body armor, helm, or gloves.';
+  }
+  if (orbId === 'fusing' && item.socketData && item.socketData.sockets.length < 2) return 'Requires at least two sockets.';
+  if ((player.orbs[orbId] || 0) < 1) return 'No Orbs of this type available.';
+  return '';
+}
+
+function setWorkFeedback(id, message) {
+  const status = document.getElementById(id);
+  status.textContent = message;
+  status.hidden = false;
+}
+
 function applyOrbToItem(orbId, item) {
-  const P = State.player;
-  if (!item || (P.orbs[orbId] || 0) < 1) return;
-  if (item.corrupted) { showBanner('Item is Corrupted and cannot be modified!'); return; }
-  if (item.rarity === 3 && orbId !== 'vaal') { showBanner('Unique items can only be Corrupted with a Vaal Orb!'); return; }
+  const P = State.player, orb = ORBS.find(entry => entry.id === orbId);
+  if (!orb) return;
+  const restriction = orbRestriction(orbId, item, P);
+  if (restriction) { showBanner(restriction); return; }
 
   if (orbId === 'transmute') {
-    if (item.rarity !== 0) { showBanner('Transmutation only works on Normal (White) items'); return; }
     P.orbs.transmute--; item.rarity = 1;
     rollAffixesForItem(item, 1, Math.random() < 0.65 ? 1 : 0);
     item.name = `Stout ${item.baseName} of Mastery`;
   } else if (orbId === 'alteration') {
-    if (item.rarity !== 1) { showBanner('Alteration only works on Magic (Blue) items'); return; }
     P.orbs.alteration--;
     rollAffixesForItem(item, 1, Math.random() < 0.7 ? 1 : 0);
   } else if (orbId === 'alchemy') {
-    if (item.rarity !== 0) { showBanner('Alchemy only works on Normal (White) items'); return; }
     P.orbs.alchemy--; item.rarity = 2;
     rollAffixesForItem(item, randInt(2, 3), randInt(2, 3));
     item.name = `${RARE_NAME_A[randInt(0, RARE_NAME_A.length - 1)]} ${RARE_NAME_B[randInt(0, RARE_NAME_B.length - 1)]} ${item.baseName}`;
   } else if (orbId === 'chaos') {
-    if (item.rarity !== 2) { showBanner('Chaos Orb only works on Rare (Yellow) items'); return; }
     P.orbs.chaos--;
     rollAffixesForItem(item, randInt(2, 3), randInt(2, 3));
     item.name = `${RARE_NAME_A[randInt(0, RARE_NAME_A.length - 1)]} ${RARE_NAME_B[randInt(0, RARE_NAME_B.length - 1)]} ${item.baseName}`;
   } else if (orbId === 'exalted') {
-    if (item.rarity !== 2) { showBanner('Exalted Orb only works on Rare (Yellow) items'); return; }
-    const total = item.prefixes.length + item.suffixes.length;
-    if (total >= 6) { showBanner('Rare item already has 6 affixes!'); return; }
+    const prefixes = openRareAffixes(item, PREFIXES, item.prefixes);
+    const suffixes = openRareAffixes(item, SUFFIXES, item.suffixes);
+    const addPrefix = prefixes.length && (!suffixes.length || Math.random() < 0.5);
+    const pool = addPrefix ? prefixes : suffixes;
+    const pick = pool[randInt(0, pool.length - 1)];
+    (addPrefix ? item.prefixes : item.suffixes).push({ key: pick.key, val: rollGearAffix(pick, item.ilvl || 1) });
     P.orbs.exalted--;
-    const addPrefix = item.prefixes.length < 3 && (item.suffixes.length >= 3 || Math.random() < 0.5);
-    const pool = (addPrefix ? PREFIXES : SUFFIXES).filter(a => a.slots.includes(item.slot) && !(addPrefix ? item.prefixes : item.suffixes).some(x => x.key === a.key));
-    if (pool.length) {
-      const pick = pool[randInt(0, pool.length - 1)];
-      (addPrefix ? item.prefixes : item.suffixes).push({ key: pick.key, val: pick.roll(item.ilvl || State.depth) });
-    }
   } else if (orbId === 'vaal') {
     P.orbs.vaal--; item.corrupted = true;
     const roll = Math.random();
@@ -4795,10 +5321,6 @@ function applyOrbToItem(orbId, item) {
       showBanner(`Vaal Orb: No change (Item Corrupted)`);
     }
   } else if (orbId === 'chromatic' || orbId === 'jeweller' || orbId === 'fusing') {
-    if (!SOCKETABLE_SLOTS.includes(item.slot)) {
-      showBanner('Socket Orbs work on Weapon, Body Armor, Helm, and Gloves!');
-      return;
-    }
     ensureItemSockets(item);
     P.orbs[orbId]--;
     if (orbId === 'chromatic') {
@@ -4845,8 +5367,59 @@ function applyOrbToItem(orbId, item) {
   AudioSys.craft();
   saveHero(true);
   State.selectedOrb = null;
+  setWorkFeedback('inventoryFeedback', orb.name + ' applied to ' + item.name + '.');
   renderInventoryMenu();
   syncGemHost();
+}
+
+function equipmentRow(item, attribute, ref, options = {}) {
+  const rarity = item ? RARITY[item.rarity] : null;
+  const slot = options.slot || SLOTS.find(entry => entry.id === item?.slot);
+  const name = item?.name || slot.name;
+  const details = item ? [
+    options.location || slot?.name || item.slot,
+    rarity?.name,
+    'Item Lv ' + item.ilvl,
+    item.setId && 'Set',
+    item.corrupted ? 'Corrupted' : item.benchMod && 'Crafted',
+  ].filter(Boolean).join(' · ') : 'Empty slot';
+  const color = rarity?.color || '#a89aa8';
+  const accent = rarity ? 'data-rarity="' + rarity.id + '" style="--item-color:' + color + '"' : '';
+  return '<button class="itemSlot' + (options.selected ? ' selected' : '') + '" ' + attribute + '="' + ref + '" ' + accent
+    + '><span class="imeta"><b style="color:' + color + '">' + name + '</b><small>' + details + '</small></span></button>';
+}
+
+function gearComparison(item, equipped) {
+  if (!equipped) return '<div class="itemCompare"><strong>Slot is empty</strong></div>';
+  const current = itemStatMap(equipped);
+  const candidate = itemStatMap(item);
+  const rows = [
+    ['Base damage (avg.)', ((candidate.minD || 0) + (candidate.maxD || 0)) / 2 - ((current.minD || 0) + (current.maxD || 0)) / 2],
+    ['Armor', (candidate.armor || 0) - (current.armor || 0)],
+    ['Max life', (candidate.life || 0) - (current.life || 0)],
+    ['Energy shield', (candidate.es || 0) - (current.es || 0)],
+    ['Added damage', (candidate.flatDmg || 0) - (current.flatDmg || 0)],
+    ['Increased damage', (candidate.pctDmg || 0) - (current.pctDmg || 0), '%'],
+  ].filter(([, change]) => change !== 0);
+  if (!rows.length) return '';
+  return '<div class="itemCompare"><strong>Compared with ' + equipped.name + '</strong><div>' + rows.map(([name, change, unit = '']) =>
+    '<span class="' + (change > 0 ? 'gain' : 'loss') + '">' + (change > 0 ? '+' : '') + change + unit + ' ' + name + '</span>'
+  ).join('') + '</div></div>';
+}
+
+function renderOrbTarget(item, player) {
+  const panel = document.getElementById('orbTarget');
+  const orb = ORBS.find(entry => entry.id === State.selectedOrb);
+  panel.hidden = !orb;
+  if (!orb) return;
+  const restriction = orbRestriction(orb.id, item, player);
+  const limit = item && ['alchemy', 'chaos', 'exalted'].includes(orb.id) ? rareGearAffixLimit(item.ilvl || 1) : null;
+  panel.innerHTML = '<div class="workCraftTitle"><strong>' + orb.name + '</strong><span>' + (player.orbs[orb.id] || 0) + ' owned</span></div>'
+    + '<p>' + orb.desc + '</p>'
+    + (item ? '<p>Target · ' + item.name + '</p>' : '')
+    + (limit ? '<p>Item level ' + (item.ilvl || 1) + ' · up to ' + limit + ' affixes</p>' : '')
+    + '<div class="workCraftAction"><button class="hudBtn" data-craft="' + orb.id + '"' + (restriction ? ' disabled' : '') + '>Apply 1 Orb</button>'
+    + (restriction ? '<small>' + restriction + '</small>' : '') + '</div>';
 }
 
 function renderInventoryMenu() {
@@ -4873,38 +5446,35 @@ function renderInventoryMenu() {
   document.getElementById('equipGrid').innerHTML = SLOTS.map(sl => {
     const it = P.eq[sl.id];
     const sel = State.selectedItemRef?.loc === 'eq' && State.selectedItemRef.idx === sl.id;
-    const col = it ? RARITY[it.rarity].color : '#635666';
-    return `<button class="itemSlot ${sel ? 'selected' : ''}" data-item="eq:${sl.id}" style="border-color:${it ? col + '88' : '#3c3040'}">
-      <span class="iico">${it ? it.icon : sl.icon}</span>
-      <span class="imeta"><b style="color:${col}">${it ? it.name : sl.name}</b><small>${it ? `${RARITY[it.rarity].name}${it.setId ? ' · Set' : ''}${it.corrupted ? ' · Corrupted' : ''}` : 'Empty Slot'}</small></span>
-    </button>`;
+    return equipmentRow(it, 'data-item', 'eq:' + sl.id, { slot: sl, selected: sel });
   }).join('');
 
   document.getElementById('orbPouch').innerHTML = ORBS.map(o => `
-    <button class="orbBtn ${State.selectedOrb === o.id ? 'activeOrb' : ''}" data-orb="${o.id}" ${(P.orbs[o.id] || 0) < 1 ? 'disabled' : ''} title="${o.desc}">
-      <span style="font-size:18px">${o.icon}</span>
-      <div><b>${o.name} (×${P.orbs[o.id] || 0})</b><small>${o.desc}</small></div>
+    <button class="orbBtn ${State.selectedOrb === o.id ? 'activeOrb' : ''}" data-orb="${o.id}" aria-pressed="${State.selectedOrb === o.id}" title="${o.desc}">
+      <b>${o.name}</b><span class="orbCount">×${P.orbs[o.id] || 0}</span>
     </button>`).join('');
 
+  document.getElementById('bagCapacity').value = P.bag.length;
+  document.getElementById('salvageNormalsBtn').disabled = !P.bag.some(item => item.rarity === 0 && !item.corrupted);
   document.getElementById('bagHeader').textContent = `Backpack (${P.bag.length}/24)`;
   document.getElementById('bagGrid').innerHTML = P.bag.length ? P.bag.map((it, idx) => {
     const sel = State.selectedItemRef?.loc === 'bag' && State.selectedItemRef.idx === idx;
-    const col = RARITY[it.rarity].color;
-    return `<button class="itemSlot ${sel ? 'selected' : ''}" data-item="bag:${idx}" style="border-color:${col}88">
-      <span class="iico">${it.icon}</span>
-      <span class="imeta"><b style="color:${col}">${it.name}</b><small>${SLOTS.find(s => s.id === it.slot).name} · iLv ${it.ilvl}${it.setId ? ' · Set' : ''}</small></span>
-    </button>`;
+    return equipmentRow(it, 'data-item', 'bag:' + idx, { selected: sel });
   }).join('') : '<div style="grid-column:1/-1;color:#8f8291;font-size:12px;padding:12px">Backpack is empty.</div>';
 
   const insp = document.getElementById('itemInspector');
   const item = getSelectedItem();
+  renderOrbTarget(item, P);
   if (!item) {
-    insp.innerHTML = `<div style="color:#a698a1;font-size:12px">${State.selectedOrb ? `Selected <b>${ORBS.find(o => o.id === State.selectedOrb).name}</b> — click any item to craft!` : 'Click an item to inspect, equip, salvage, or craft with Orbs.'}</div>`;
+    insp.style.removeProperty('--item-color');
+    insp.innerHTML = '<p class="workEmpty">Select an item from your backpack or equipped gear.</p>';
     return;
   }
   const col = RARITY[item.rarity].color;
   const lines = formatAffixLines(item);
   const inBag = State.selectedItemRef.loc === 'bag';
+  insp.style.setProperty('--item-color', col);
+  const comparison = inBag ? gearComparison(item, P.eq[item.slot]) : '';
   const sDef = item.setId ? ITEM_SETS[item.setId] : null;
   const sCnt = sDef ? (setCounts[sDef.id] || 0) : 0;
   const setHtml = sDef ? `<div class="setTag"><b>Set: ${sDef.name} (${sCnt}/3)</b><br><span style="opacity:${sCnt>=2?1:0.55}">${sDef.bonus2Desc}</span><br><span style="opacity:${sCnt>=3?1:0.55}">${sDef.bonus3Desc}</span></div>` : '';
@@ -4921,20 +5491,17 @@ function renderInventoryMenu() {
     socketHtml = `<div style="font-size:11.5px;color:#d6c8db;margin-bottom:6px"><b>Sockets (${sd.sockets.length}):</b> ${chainStr}${gemCount ? ` · <span style="color:#ffd87a">${gemCount} Gem${gemCount > 1 ? 's' : ''}</span>` : ''}</div>`;
   }
   insp.innerHTML = `
-    <h4 style="color:${col}">${item.icon} ${item.name}</h4>
+    <h4 style="color:${col}">${item.name}</h4>
     <div class="subline">${RARITY[item.rarity].name} ${SLOTS.find(s => s.id === item.slot).name} · Item Level ${item.ilvl}</div>
     ${item.pinnacle ? '<div class="pinnacleTag">☄️ PINNACLE UBER UNIQUE</div>' : ''}
     ${item.corrupted ? '<div class="corruptedTag">CORRUPTED (Locked)</div>' : ''}
-    ${item.power ? `<div class="upower">✦ ${item.power}</div>` : ''}
+    ${comparison}
+    ${item.power ? `<div class="upower"><strong>Item power</strong><br>${item.power}</div>` : ''}
     ${setHtml}
     ${socketHtml}
     <ul>${lines.map(l => `<li>${l}</li>`).join('') || '<li>Base crafting item (0 affixes)</li>'}</ul>
     <div class="actions">
       ${inBag ? `<button class="hudBtn" data-act="equip">Equip</button><button class="hudBtn" data-act="salvage">Salvage → Orbs</button>` : ''}
-      ${!item.corrupted && item.rarity === 0 ? `<button class="hudBtn" data-craft="transmute" ${(P.orbs.transmute||0)<1?'disabled':''}>Use Transmute</button><button class="hudBtn" data-craft="alchemy" ${(P.orbs.alchemy||0)<1?'disabled':''}>Use Alchemy</button>` : ''}
-      ${!item.corrupted && item.rarity === 1 ? `<button class="hudBtn" data-craft="alteration" ${(P.orbs.alteration||0)<1?'disabled':''}>Use Alteration</button>` : ''}
-      ${!item.corrupted && item.rarity === 2 ? `<button class="hudBtn" data-craft="chaos" ${(P.orbs.chaos||0)<1?'disabled':''}>Use Chaos</button><button class="hudBtn" data-craft="exalted" ${(P.orbs.exalted||0)<1?'disabled':''}>Use Exalted</button>` : ''}
-      ${!item.corrupted ? `<button class="hudBtn" data-craft="vaal" ${(P.orbs.vaal||0)<1?'disabled':''}>Corrupt (Vaal)</button>` : ''}
     </div>`;
 }
 
@@ -4967,16 +5534,22 @@ document.getElementById('salvageNormalsBtn').onclick = () => {
 document.getElementById('invOverlay').addEventListener('click', e => {
   const P = State.player;
   const orbBtn = e.target.closest('[data-orb]');
-  if (orbBtn) { State.selectedOrb = State.selectedOrb === orbBtn.dataset.orb ? null : orbBtn.dataset.orb; renderInventoryMenu(); return; }
+  if (orbBtn) {
+    State.selectedOrb = State.selectedOrb === orbBtn.dataset.orb ? null : orbBtn.dataset.orb;
+    renderInventoryMenu();
+    if (State.selectedOrb) document.getElementById('orbTarget').scrollIntoView({ block: 'nearest' });
+    return;
+  }
 
   const itemBtn = e.target.closest('[data-item]');
   if (itemBtn) {
     const [loc, idxRaw] = itemBtn.dataset.item.split(':');
     const idx = loc === 'eq' ? idxRaw : +idxRaw;
     const item = loc === 'eq' ? P.eq[idx] : P.bag[idx];
-    if (State.selectedOrb && item) { applyOrbToItem(State.selectedOrb, item); return; }
     State.selectedItemRef = item ? { loc, idx } : null;
-    renderInventoryMenu(); return;
+    renderInventoryMenu();
+    if (item) document.getElementById('itemInspector').scrollIntoView({ block: 'nearest' });
+    return;
   }
 
   const craftBtn = e.target.closest('[data-craft]');
@@ -4998,6 +5571,7 @@ document.getElementById('invOverlay').addEventListener('click', e => {
       AudioSys.craft();
       saveHero(true);
       syncGemHost();
+      setWorkFeedback('inventoryFeedback', item.name + ' equipped.');
       if (mig.stashed > 0) {
         showBanner(`Equipped ${item.name} (${mig.transferred} gems transferred, ${mig.stashed} moved to Gem Stash)`);
       }
@@ -5014,7 +5588,9 @@ document.getElementById('invOverlay').addEventListener('click', e => {
       AudioSys.craft();
       saveHero(true);
       syncGemHost();
-      showBanner(`Salvaged → +1 ${ORBS.find(o => o.id === orbGain).name}`);
+      const reward = ORBS.find(o => o.id === orbGain).name;
+      showBanner('Salvaged → +1 ' + reward);
+      setWorkFeedback('inventoryFeedback', item.name + ' salvaged · +1 ' + reward + '.');
     }
     renderInventoryMenu();
   }
@@ -5026,14 +5602,23 @@ document.getElementById('invOverlay').addEventListener('click', e => {
 const pCanvas = document.getElementById('passiveCanvas');
 const pCtx = pCanvas.getContext('2d');
 
+function passiveUnlockHint(node, player) {
+  if (node.kind === 'start' && node.cls !== player.cls.id) return 'Origin of another class';
+  if (node.requiredBoss === 1 && (!player.bossesDefeated.has(1) || player.lv < node.minLevel)) {
+    return 'Defeat Vaelkor and reach level ' + node.minLevel;
+  }
+  return '';
+}
+
 function isPassiveReachable(node) {
   const P = State.player;
-  return !P.allocatedPassives.has(node.id) && node.links.some(lid => P.allocatedPassives.has(lid));
+  return !P.allocatedPassives.has(node.id) && !passiveUnlockHint(node, P)
+    && node.links.some(lid => P.allocatedPassives.has(lid));
 }
 
 function canRefundPassive(node) {
   const P = State.player;
-  if (!P.allocatedPassives.has(node.id) || node.kind === 'start') return false;
+  if (!P.allocatedPassives.has(node.id) || (node.kind === 'start' && node.cls === P.cls.id)) return false;
   const startNode = PASSIVE_NODES.find(n => n.cls === P.cls.id);
   if (!startNode) return false;
   const remaining = new Set(P.allocatedPassives);
@@ -5165,11 +5750,12 @@ function renderPassiveTree() {
     const refundable = canRefundPassive(node);
     const kindLabel = node.kind === 'keystone' ? 'Rule-Breaking Keystone' : node.kind === 'notable' ? 'Notable Constellation' : node.kind === 'jewel' ? 'Passive Jewel Socket' : node.kind === 'start' ? 'Class Origin' : 'Minor Star';
     let statusHint = '';
-    if (owned && node.kind === 'start') statusHint = '<div style="color:#82f5aa;font-size:12px;margin-top:4px">✦ Starting Origin (Always Active)</div>';
+    const unlockHint = passiveUnlockHint(node, P);
+    if (owned && node.kind === 'start' && node.cls === P.cls.id) statusHint = '<div style="color:#82f5aa;font-size:12px;margin-top:4px">✦ Starting Origin (Always Active)</div>';
     else if (owned) statusHint = `<div style="color:${refundable ? '#ffd87a' : '#9c8ea3'};font-size:12px;margin-top:4px">${refundable ? '✦ Allocated (Click star to refund)' : '✦ Allocated (Bridge node — refund outer stars first)'}</div>`;
     else if (reach && P.passivePts > 0) statusHint = '<div style="color:#82f5aa;font-size:12px;margin-top:4px">✦ Available — Click star to allocate (-1 Pt)</div>';
     else if (reach) statusHint = '<div style="color:#e08989;font-size:12px;margin-top:4px">Need 1 Passive Point (Level up or slay Act Bosses)</div>';
-    else statusHint = '<div style="color:#9c8ea3;font-size:12px;margin-top:4px">Connect an adjacent star first</div>';
+    else statusHint = '<div style="color:#9c8ea3;font-size:12px;margin-top:4px">' + (unlockHint || 'Connect an adjacent star first') + '</div>';
 
     let jewelHtml = '';
     if (node.kind === 'jewel') {
@@ -5177,14 +5763,14 @@ function renderPassiveTree() {
       const pouch = P.jewelStash || [];
       jewelHtml = `
         <div style="border-top:1px solid #352b3b;padding-top:8px;margin-top:4px">
-          <b style="color:#ffd87a;font-size:11.5px">${sock ? `Socketed: ${sock.icon} ${sock.name}` : 'Empty Jewel Socket'}</b>
+          <b style="color:#ffd87a;font-size:11.5px">${sock ? `Socketed: ${sock.name}` : 'Empty Jewel Socket'}</b>
           ${sock ? `<div style="font-size:11px;color:#dfd4e2;margin:4px 0">${sock.lines.join(' · ')}</div>
             <button class="hudBtn" data-jun="${node.id}" style="padding:3px 8px;font-size:11px">Unsocket Jewel</button>` : ''}
           <div style="margin-top:7px;font-size:11px;color:#bfb2c2">Jewel Pouch (${pouch.length}/18):</div>
           <div class="jewelList">
             ${pouch.length ? pouch.map((j, idx) => `
               <div class="jewelRow" style="border-color:${j.col}77">
-                <div class="jhead"><b style="color:${j.col}">${j.icon} ${j.name}</b><small style="color:#9c8ea3">iLv ${j.ilvl}</small></div>
+                <div class="jhead"><b style="color:${j.col}">${j.name}</b><small style="color:#9c8ea3">iLv ${j.ilvl}</small></div>
                 <div style="color:#dfd4e2;font-size:10.5px">${j.lines.join(' · ')}</div>
                 <div class="jacts">
                   ${owned ? `<button class="hudBtn" data-jsock="${node.id}:${idx}">Socket</button>` : ''}
@@ -5362,20 +5948,12 @@ function renderStashModal() {
     document.getElementById('stashItemsGrid').innerHTML = '<div style="grid-column:1/-1;color:#9de8b8;font-size:12px;padding:12px">🗡️ Solo Self-Found Mode: Shared Sanctuary Stash is sealed for this hero (+20% Item Rarity &amp; +18% Socket Orb drops active).</div>';
   } else {
     document.getElementById('stashItemsGrid').innerHTML = TownStash.length ? TownStash.map((it, idx) => {
-      const col = RARITY[it.rarity]?.color || '#e8e2ea';
-      return `<button class="itemSlot" data-st="stash:${idx}" style="border-color:${col}88">
-        <span class="iico">${it.icon}</span>
-        <span class="imeta"><b style="color:${col}">${it.name}</b><small>${SLOTS.find(s => s.id === it.slot)?.name || it.slot} · iLv ${it.ilvl}</small></span>
-      </button>`;
+      return equipmentRow(it, 'data-st', 'stash:' + idx);
     }).join('') : '<div style="grid-column:1/-1;color:#8f8291;font-size:12px;padding:12px">Sanctuary Stash is empty. Click Backpack items on the right to store them permanently.</div>';
   }
 
   document.getElementById('stashBagGrid').innerHTML = P.bag.length ? P.bag.map((it, idx) => {
-    const col = RARITY[it.rarity]?.color || '#e8e2ea';
-    return `<button class="itemSlot" data-st="bag:${idx}" style="border-color:${col}88">
-      <span class="iico">${it.icon}</span>
-      <span class="imeta"><b style="color:${col}">${it.name}</b><small>${SLOTS.find(s => s.id === it.slot)?.name || it.slot} · iLv ${it.ilvl}</small></span>
-    </button>`;
+    return equipmentRow(it, 'data-st', 'bag:' + idx);
   }).join('') : '<div style="grid-column:1/-1;color:#8f8291;font-size:12px;padding:12px">Backpack is empty.</div>';
 
   const dp = DungeonProgression.getState();
@@ -5487,16 +6065,15 @@ function renderAtlasModal() {
     : P.waystones.length ? P.waystones.map((ws, i) => {
       const col = RARITY[ws.rarity]?.color || '#e8e2ea';
       const sel = i === State.selectedWsIdx;
-      return `<div class="wsCard ${sel ? 'selected' : ''}" data-ws="${i}" style="border-color:${col}88">
-        <b style="color:${col}">🗺️ ${ws.name}${ws.corrupted ? ' 🩸' : ''}</b>
-        <small>Tier ${ws.tier} · Area Lv ${19 + ws.tier} · ${ws.mods.length} mod${ws.mods.length === 1 ? '' : 's'}</small>
+      return `<div class="wsCard ${sel ? 'selected' : ''}" data-ws="${i}" data-rarity="${ws.rarity}" style="--item-color:${col}">
+        <b style="color:${col}">${ws.name}</b>
+        <small>Tier ${ws.tier} · Area Lv ${19 + ws.tier} · ${ws.mods.length} mod${ws.mods.length === 1 ? '' : 's'}${ws.corrupted ? ' · Corrupted' : ''}</small>
       </div>`;
     }).join('') : '<div style="grid-column:1/-1;color:#8f8291;font-size:12px;padding:12px">No Waystones left. Slay Depth 20 Boss or Delve Overseers to find more!</div>';
 
   const atlasOrbs = ORBS.filter(o => ['transmute', 'alteration', 'alchemy', 'chaos', 'vaal'].includes(o.id));
   document.getElementById('wsOrbPouch').innerHTML = atlasOrbs.map(o => `
     <button class="orbBtn" data-wsorb="${o.id}" ${!endgameOpen || (P.orbs[o.id] || 0) < 1 || !P.waystones.length ? 'disabled' : ''} title="${o.desc}">
-      <span style="font-size:17px">${o.icon}</span>
       <div><b>${o.name} (×${P.orbs[o.id] || 0})</b><small>${o.desc}</small></div>
     </button>`).join('');
 
@@ -5511,7 +6088,7 @@ function renderAtlasModal() {
     const sameTierCount = P.waystones.filter(x => x.tier === ws.tier && !x.corrupted).length;
     const canUpgrade = ws.tier < 10 && sameTierCount >= 3;
     insp.innerHTML = `
-      <h4 style="color:${col}">🗺️ ${ws.name}</h4>
+      <h4 style="color:${col}">${ws.name}</h4>
       <div class="subline">Tier ${ws.tier} · Scaled Area Depth ${19 + ws.tier}</div>
       ${ws.corrupted ? '<div class="corruptedTag">CORRUPTED</div>' : ''}
       <ul>${ws.mods.length ? ws.mods.map(m => `<li>${m.label}</li>`).join('') : '<li>Normal Waystone — Roll with Transmutation or Alchemy Orb!</li>'}</ul>
@@ -5789,7 +6366,7 @@ function renderBenchModal() {
       const opts = FLASK_ENCHANTS[f.id] || [];
       return `<div class="flaskForgeCard ${curEnc ? 'enchanted' : ''}">
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <b style="font-size:13px;color:${curEnc ? '#ffd87a' : '#f1e8f5'}">${cfg.icon} ${cfg.label}</b>
+          <b style="font-size:13px;color:${curEnc ? '#ffd87a' : '#f1e8f5'}">${cfg.label}</b>
           <span style="font-size:11px;color:#bfb2c2">${f.charges}/${f.max} · Cost ${f.cost}</span>
         </div>
         <div style="color:#a99bb0">${cfg.baseDesc}</div>
@@ -5805,7 +6382,7 @@ function renderBenchModal() {
             return `<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 8px;background:#100d15;border:1px solid ${applied ? '#ffd87a88' : '#332838'};border-radius:5px">
               <div><b style="color:#f0e7f5">${enc.name}</b><br><small style="color:#b8aab8">${enc.desc}</small></div>
               <button class="hudBtn" data-fenc="${f.id}:${enc.id}" ${blocked ? 'disabled' : ''}>
-                ${applied ? '✦ Active' : `${orbMeta?.icon || ''} ${enc.cost} (${have})`}
+                ${applied ? '✦ Active' : `${enc.cost}× ${orbMeta?.name || enc.orb} (${have})`}
               </button>
             </div>`;
           }).join('')}
@@ -5825,30 +6402,39 @@ function renderBenchModal() {
   if (!State.selectedBenchRef && entries.length) State.selectedBenchRef = { loc: entries[0].loc, idx: entries[0].idx };
 
   document.getElementById('benchItemGrid').innerHTML = entries.length ? entries.map(en => {
-    const col = RARITY[en.item.rarity]?.color || '#e8e2ea';
     const sel = State.selectedBenchRef?.loc === en.loc && State.selectedBenchRef.idx === en.idx;
-    return `<button class="itemSlot ${sel ? 'selected' : ''}" data-bitem="${en.loc}:${en.idx}" style="border-color:${col}88">
-      <span class="iico">${en.item.icon}</span>
-      <span class="imeta"><b style="color:${col}">${en.item.name}</b><small>${en.tag}${en.item.corrupted ? ' · Corrupted' : en.item.benchMod ? ' · Crafted' : ''}</small></span>
-    </button>`;
+    return equipmentRow(en.item, 'data-bitem', en.loc + ':' + en.idx, { selected: sel, location: en.tag });
   }).join('') : '<div style="grid-column:1/-1;color:#8f8291;font-size:12px;padding:12px">No items available to craft.</div>';
 
   const target = getBenchItem(State.selectedBenchRef);
-  document.getElementById('benchTargetTitle').textContent = target
-    ? `Crafts for ${target.name}${target.benchMod ? ` (Current: ${target.benchMod.label})` : ''}`
-    : 'Targeted Bench Crafts';
+  const title = document.getElementById('benchTargetTitle');
+  title.innerHTML = target
+    ? '<div class="workCraftTitle"><strong style="color:' + RARITY[target.rarity].color + '">' + target.name + '</strong><span>' + (State.selectedBenchRef.loc === 'eq' ? 'Equipped' : 'Backpack') + '</span></div>'
+      + '<p>' + (target.corrupted ? 'Corrupted · crafting locked.' : target.benchMod ? 'Current craft · ' + target.benchMod.label + '. Applying a recipe replaces it.' : 'No bench modifier applied.') + '</p>'
+    : '<p>Select a piece of equipment.</p>';
 
   document.getElementById('benchCraftList').innerHTML = BENCH_CRAFTS.map(c => {
     const orbMeta = ORBS.find(o => o.id === c.orb);
     const have = P.orbs[c.orb] || 0;
     const isApplied = target?.benchMod?.id === c.id;
-    const lvLocked = P.lv < c.minLv;
-    const blocked = lvLocked || !target || target.corrupted || have < c.cost || isApplied;
+    const status = isApplied ? 'Applied'
+      : !target ? 'Select gear'
+      : target.corrupted ? 'Corrupted gear'
+      : P.lv < c.minLv ? 'Unlocks at level ' + c.minLv
+      : have < c.cost ? 'Need ' + (c.cost - have) + ' more'
+      : '';
     return `<div class="benchRow ${isApplied ? 'applied' : ''}">
-      <div><b>T${c.tier} · ${c.name}</b><small>${c.label}${lvLocked ? ` · 🔒 Lv ${c.minLv}` : ''}</small></div>
-      <button class="hudBtn" data-bcraft="${c.id}" ${blocked ? 'disabled' : ''}>
-        ${lvLocked ? `🔒 Lv ${c.minLv}` : isApplied ? '✦ Applied' : `${orbMeta?.icon || ''} ${c.cost}× ${orbMeta?.name || c.orb} (${have})`}
-      </button>
+      <div>
+        <b>${c.name}</b>
+        <div class="benchEffect">${c.label}</div>
+        <div class="benchCost ${have < c.cost && !isApplied ? 'benchMissing' : ''}">${c.cost} × ${orbMeta.name} · ${have} owned</div>
+      </div>
+      <div class="benchStatus">
+        <button class="hudBtn" data-bcraft="${c.id}" ${status ? 'disabled' : ''}>
+          ${isApplied ? 'Applied' : target?.benchMod ? 'Replace' : 'Craft'}
+        </button>
+        ${status && !isApplied ? `<small>${status}</small>` : ''}
+      </div>
     </div>`;
   }).join('');
 }
@@ -5858,6 +6444,7 @@ document.getElementById('benchOverlay').addEventListener('click', e => {
   const tabBtn = e.target.closest('[data-btab-bench]');
   if (tabBtn) {
     State.benchTab = tabBtn.dataset.btabBench;
+    document.getElementById('benchFeedback').hidden = true;
     renderBenchModal();
     return;
   }
@@ -5876,6 +6463,7 @@ document.getElementById('benchOverlay').addEventListener('click', e => {
     AudioSys.craft();
     saveHero(true);
     showBanner(`🧪 Enchanted ${FLASK_BASE_CONFIG[fId].label}: ${enc.name}`);
+    setWorkFeedback('benchFeedback', FLASK_BASE_CONFIG[fId].label + ' · ' + enc.name + ' applied.');
     renderBenchModal();
     return;
   }
@@ -5890,7 +6478,7 @@ document.getElementById('benchOverlay').addEventListener('click', e => {
   if (craftBtn && !craftBtn.disabled) {
     const target = getBenchItem(State.selectedBenchRef);
     const craft = BENCH_CRAFTS.find(c => c.id === craftBtn.dataset.bcraft);
-    if (!target || !craft || target.corrupted || P.lv < craft.minLv) return;
+    if (!target || !craft || target.corrupted || P.lv < craft.minLv || target.benchMod?.id === craft.id) return;
     if ((P.orbs[craft.orb] || 0) < craft.cost) { showBanner('Not enough Orbs!'); return; }
     P.orbs[craft.orb] -= craft.cost;
     target.benchMod = { id: craft.id, label: craft.label, mods: { ...craft.mods } };
@@ -5898,6 +6486,7 @@ document.getElementById('benchOverlay').addEventListener('click', e => {
     AudioSys.craft();
     saveHero(true);
     showBanner(`Bench Crafted: ${craft.label}`);
+    setWorkFeedback('benchFeedback', target.name + ' · ' + craft.label + ' applied.');
     renderBenchModal();
   }
 });
@@ -5907,6 +6496,7 @@ document.getElementById('benchOverlay').addEventListener('click', e => {
 // ============================================================================
 function applyClassHud(cls) {
   document.getElementById('classPill').textContent = cls.name;
+  document.getElementById('hudBottom').style.setProperty('--class-color', cls.accent);
   document.getElementById('resourceLabel').textContent = cls.resName;
   document.getElementById('resourceFill').style.background = cls.resColor;
   document.querySelector('#slotEvade span').textContent = cls.evadeIcon;
@@ -5997,7 +6587,7 @@ const choicesEl = document.getElementById('classChoices');
 Object.values(CLASSES).forEach(cls => {
   const card = document.createElement('div');
   card.className = 'clsCard';
-  card.innerHTML = `<div class="head"><span class="emoji">${cls.emoji}</span><div><h2>${cls.name}</h2><div class="tag">${cls.tag}</div></div></div><p>${cls.desc}</p><ul>${cls.perks.map(p => `<li>${p}</li>`).join('')}</ul><button class="btnPrimary">Enter as ${cls.name}</button>`;
+  card.innerHTML = `<div class="head"><img class="classPortrait" width="84" height="84" alt="" src="${EclipseArt.classPortrait(cls)}"><div><h2>${cls.name}</h2><div class="tag">${cls.tag}</div></div></div><p>${cls.desc}</p><ul>${cls.perks.map(p => `<li>${p}</li>`).join('')}</ul><button class="btnPrimary">Enter as ${cls.name}</button>`;
   card.querySelector('button').onclick = () => startGame(cls.id);
   choicesEl.appendChild(card);
 });
@@ -6024,6 +6614,7 @@ function startGame(classId) {
   document.getElementById('classOverlay').style.display = 'none';
   applyClassHud(P.cls);
   buildFloor(1);
+  showBanner('Press G to link your first support gem');
   syncGemHost();
 }
 
@@ -6098,12 +6689,7 @@ document.getElementById('muteBtn').onclick = () => {
   document.getElementById('muteBtn').textContent = isM ? '🔇' : '🔊';
   if (!isM) AudioSys.craft();
 };
-document.getElementById('actionPrompt').onclick = () => {
-  if (document.getElementById('actionPrompt').querySelector('kbd').textContent === 'F') {
-    const near = findNearestVisibleDrop(95);
-    if (near) pickupDrop(near);
-  } else interactNearby();
-};
+document.getElementById('actionPrompt').onclick = interactNearby;
 document.getElementById('slot2').onclick = () => castSkillSlot(2);
 document.getElementById('slot3').onclick = () => castSkillSlot(3);
 document.getElementById('slotEvade').onclick = triggerEvade;
@@ -6217,7 +6803,7 @@ let lastTime = performance.now();
 function loop(now) {
   const dt = Math.min(0.05, Math.max(0, (now - lastTime) / 1000));
   lastTime = now;
-  update(dt);
+  if (now >= arrivalHoldUntil) update(dt);
   render();
   renderMinimap();
   updateHud();

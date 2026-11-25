@@ -41,7 +41,7 @@ export interface SocketedItem {
   id: string;
   name: string;
   slot: string;
-  rarity: 'Magic' | 'Rare' | 'Unique';
+  rarity: 'Normal' | 'Magic' | 'Rare' | 'Unique';
   icon: string;
   corrupted?: boolean;
   sockets: ItemSocket[];
@@ -1332,7 +1332,7 @@ export const GemSocketManager: React.FC<GemSocketManagerProps> = ({
 
   return (
     <>
-      <div className="pointer-events-none fixed bottom-14 right-3.5 z-40 flex items-center justify-end">
+      <div className="pointer-events-none fixed bottom-14 right-3.5 z-40 hidden min-[1100px]:flex items-center justify-end">
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
@@ -1453,11 +1453,19 @@ export const GemSocketManager: React.FC<GemSocketManagerProps> = ({
                         ? getLinkGroupForSocket(item, hoveredSocket.index)
                         : [];
 
+                    const rarityColor = {
+                      Normal: '#d8d4de',
+                      Magic: '#63a8ff',
+                      Rare: '#ffd257',
+                      Unique: '#f0863a',
+                    }[item.rarity];
+
                     return (
                       <article
                         key={item.id}
                         onClick={() => setSelectedItemId(item.id)}
-                        className={`flex flex-col rounded-md border p-4 transition ${
+                        style={{ borderLeftColor: rarityColor }}
+                        className={`flex flex-col rounded-md border border-l-2 p-4 transition ${
                           isSelected
                             ? 'border-[#dfb672]/70 bg-[#171220]'
                             : 'border-white/10 bg-[#120e19] hover:border-[#dfb672]/35'
@@ -1465,20 +1473,9 @@ export const GemSocketManager: React.FC<GemSocketManagerProps> = ({
                       >
                         <div className="mb-3 flex items-start justify-between gap-2 border-b border-white/10 pb-2.5">
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span aria-hidden="true" className="text-base">
-                                {item.icon}
-                              </span>
-                              <h3
-                                className={`truncate text-sm font-bold ${
-                                  item.rarity === 'Unique'
-                                    ? 'text-[#f09a54]'
-                                    : 'text-[#ffd87a]'
-                                }`}
-                              >
-                                {item.name}
-                              </h3>
-                            </div>
+                            <h3 className="break-words text-sm font-bold" style={{ color: rarityColor }}>
+                              {item.name}
+                            </h3>
                             <p className="font-mono-num mt-0.5 text-[11px] text-[#9e91a3]">
                               {item.slot} · {item.rarity} · {item.sockets.length} Sockets ·{' '}
                               {maxLinkLen > 1 ? `${maxLinkLen}-Link` : 'Unlinked'}
@@ -2454,11 +2451,7 @@ export const GemSocketManager: React.FC<GemSocketManagerProps> = ({
                                 : 'border-white/10 bg-[#100d17] hover:border-[#dfb672]/45'
                             }`}
                           >
-                            <div
-                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-lg ${cMeta.bg} ${cMeta.ring}`}
-                            >
-                              {gem.icon}
-                            </div>
+                            <span aria-hidden="true" className={`mt-1.5 h-2 w-2 shrink-0 rotate-45 border ${cMeta.bg} ${cMeta.ring}`} />
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-2">
                                 <span className="truncate text-xs font-bold text-[#f4e9d8]">
