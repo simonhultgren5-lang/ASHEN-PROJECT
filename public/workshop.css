@@ -1,0 +1,135 @@
+.workOverlay {
+  background: radial-gradient(ellipse at 50% -10%, #483226e8, #0a080ef5 68%);
+}
+
+.workCard {
+  width: min(1150px, 96vw);
+  max-height: 94dvh;
+  padding: clamp(12px, 2.6vw, 28px);
+  background: linear-gradient(145deg, #262029, #14111a 72%);
+}
+
+.workCard .modalHeader {
+  padding: 0 0 14px;
+  border-color: #b48c674f;
+}
+
+.workCard .modalHeader h2 {
+  font-size: clamp(24px, 3.3vw, 34px);
+  line-height: 1.1;
+}
+
+.workHeader kbd { color: #d5b28a; margin-left: 4px; }
+
+.inventoryVitals {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.inventoryVitals .statsGrid, .inventoryVitals .resRow { margin: 0; }
+.inventoryVitals .statsGrid { background: #100d145c; }
+.inventoryVitals .resPill { display: grid; place-items: center; background: #100d145c; }
+.inventoryWork { display: grid; grid-template-columns: 1fr 1.28fr .88fr; gap: 12px; align-items: start; }
+
+.workPane {
+  min-width: 0;
+  padding: 12px;
+  background: #130f19;
+  border: 1px solid #4a3b4b;
+  border-radius: 4px;
+}
+
+.workHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+  margin-bottom: 9px;
+  color: #cdbdca;
+  font-size: 11px;
+}
+
+.workHeading h3 { margin: 0; color: #f5d5a8; font: 700 15px Georgia, serif; }
+.workCard .bagGrid { max-height: 395px; margin: 0; padding: 2px; }
+#bagGrid { grid-template-columns: minmax(0, 1fr); }
+#equipGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.workCard .itemSlot { min-height: 40px; padding: 5px 8px; }
+.workCard .itemSlot.selected { outline: 1px solid #e7b983; outline-offset: 0; }
+.workCard .hudBtn:disabled { cursor: default; opacity: .52; }
+
+#bagCapacity { width: 100%; height: 8px; margin: 0 0 8px; accent-color: #d5aa74; }
+#bagCapacity::-webkit-meter-bar { background: #231c29; border: 0; }
+#bagCapacity::-webkit-meter-optimum-value { background: linear-gradient(90deg,#8f5943,#e6bc82); }
+
+.inventoryDetails #itemInspector {
+  border: 1px solid #52404f;
+  border-top: 2px solid var(--item-color, #52404f);
+  background: linear-gradient(150deg,#241b2b,#100d16 65%);
+  padding: 12px;
+  overflow-wrap: anywhere;
+}
+
+.inventoryDetails .inspector h4 { font: 700 21px/1.13 Georgia, serif; }
+.inventoryDetails .upower { border-color: var(--item-color); }
+.workEmpty { color: #c5b4c7; margin: 5px 0; }
+
+.itemCompare {
+  padding: 8px;
+  margin: 8px 0;
+  background: #101019;
+  border: 1px solid #413345;
+  color: #cdbccc;
+  font-size: 11px;
+}
+
+.itemCompare div { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; }
+.itemCompare .gain { color: #a4e0b2; }
+.itemCompare .loss { color: #f3a0ac; }
+
+.currencyPane { margin-top: 12px; }
+.currencyPane .orbPouch { grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); margin: 0; }
+.currencyPane .orbBtn { justify-content: space-between; min-height: 34px; }
+.orbCount, .workCraftTitle span { color: #e7c79a; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+#orbTarget:not([hidden]), .benchTarget {
+  margin-top: 10px;
+  padding: 10px;
+  border-left: 2px solid #d2a372;
+  background: #2c202b;
+  color: #e9d8db;
+}
+
+.workCraftTitle, .workCraftAction { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px; }
+.workCraftTitle strong { color: #f5dbb0; }
+#orbTarget p, .benchTarget p { margin: 5px 0; font-size: 12px; }
+.workCraftAction small { color: #eab1b9; }
+.workFeedback { margin: 0 0 10px; padding: 8px 11px; color: #f8e4c0; background: #372635; border-left: 2px solid #d8a779; }
+
+#benchOverlay .benchLayout { grid-template-columns: minmax(230px,.72fr) minmax(0,1.28fr); }
+#benchOverlay .benchTarget { margin: 0 0 8px; }
+#benchOverlay .benchList { max-height: min(390px, 48dvh); }
+.workCard .benchRow { border-color: #47374a; padding: 9px; }
+.benchEffect { color: #f4e5e2; }
+.benchCost { margin-top: 4px; color: #cbbbc9; font-size: 11px; }
+.benchMissing { color: #f0aab6; }
+.benchStatus { display: grid; justify-items: end; gap: 3px; text-align: right; flex: 0 0 auto; }
+.benchStatus small { max-width: 115px; color: #d6bdca; }
+.workCard .flaskForgeCard { padding: 12px; background: linear-gradient(#221a2a,#15111c); }
+.workCard .tabBtn { min-height: 34px; }
+
+@media (max-width: 850px) {
+  .inventoryWork { grid-template-columns: 1fr 1fr; }
+  .inventoryDetails { grid-row: 1 / span 2; grid-column: 2; }
+  .inventoryVitals { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 570px) {
+  .inventoryWork, #benchOverlay .benchLayout { grid-template-columns: 1fr; }
+  .inventoryDetails { grid-area: auto; }
+  .workCard .bagGrid { max-height: 206px; }
+  .workCard .statsGrid, .workCard .resRow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #equipGrid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}

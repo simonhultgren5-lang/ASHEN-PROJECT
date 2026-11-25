@@ -196,6 +196,10 @@ export const DungeonProgression: React.FC<DungeonProgressionProps> = ({
   useEffect(() => {
     const onMessage = (event: MessageEvent<HostDepthMessage>) => {
       const data = event.data;
+      if (event.source === iframeRef?.current?.contentWindow && data?.type === 'ASHEN_OPEN_DEPTH_GATE') {
+        setDrawerOpen(true);
+        return;
+      }
       if (!data || data.type !== 'ASHEN_DEPTH_STATE') return;
 
       const cleared =
@@ -216,7 +220,7 @@ export const DungeonProgression: React.FC<DungeonProgressionProps> = ({
 
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, []);
+  }, [iframeRef]);
 
   const attemptEnterDepth = useCallback(
     (targetDepth: number) => {
@@ -288,7 +292,7 @@ export const DungeonProgression: React.FC<DungeonProgressionProps> = ({
       {drawerOpen && (
         <section
           aria-label="Dungeon Progression"
-          className="pointer-events-auto w-[min(476px,92vw)] rounded-md border border-[#dfb672]/30 bg-[#100d16]/95 p-4 text-[#f1e6d8] shadow-[0_22px_60px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,232,196,0.08)] backdrop-blur-md"
+          className="pointer-events-auto max-h-[90dvh] overflow-y-auto w-[min(476px,92vw)] rounded-md border border-[#dfb672]/30 bg-[#100d16]/95 p-4 text-[#f1e6d8] shadow-[0_22px_60px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,232,196,0.08)] backdrop-blur-md"
         >
           <div className="mb-3 flex items-start justify-between gap-3 border-b border-white/10 pb-2.5">
             <div>
@@ -403,7 +407,7 @@ export const DungeonProgression: React.FC<DungeonProgressionProps> = ({
             attemptCompleteDepth(MAX_CAMPAIGN_DEPTH);
           }
         }}
-        className={`font-mono-num pointer-events-auto flex items-center gap-2 rounded border px-3 py-1.5 text-xs font-bold tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.75)] transition hover:brightness-110 ${
+        className={`font-mono-num pointer-events-auto hidden min-[1100px]:flex items-center gap-2 rounded border px-3 py-1.5 text-xs font-bold tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.75)] transition hover:brightness-110 ${
           higherUnlocked ? 'depth-tile-cleared' : 'depth-tile-unlocked'
         }`}
       >
